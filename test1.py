@@ -2,8 +2,10 @@ import pandas as pd
 
 df = pd.read_excel('template.xlsx',converters={'tel': str})
 print(df)
+# 去除不需要的欄位
 df = df.drop('id', axis=1).drop('學生證', axis=1).drop('身份證', axis=1).drop('在學證明', axis=1)
 #print(df)
+# df 欄位名稱 必須跟 DB table 欄位名稱一樣, 如此, 才能用df.to_sql 
 df = df.rename(columns={'校名': 'school_name', '姓名': 'student_name','tel': 'phone', '背號': 'jersey_number'})
 print(df)
 #df.reset_index()

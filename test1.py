@@ -34,7 +34,7 @@ i = 0
 #engine.execute(sql)
 
 #送資料到資料庫
-df.to_sql('registration_test', engine, index=False,if_exists='append')
+df.to_sql('registration_test', engine, index=False, if_exists='append')
 
 #從資料庫抓資料
 sql = "select * from registration_test" 

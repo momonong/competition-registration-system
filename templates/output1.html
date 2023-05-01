@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>運動報名系統</title>
+    <meta charset='utf-8'>   
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</head>
+<body>
+  <h1> 運動報名系統 </h1>  
+  <div class="container-fluid">
+    {{outmessage|safe}}    
+  </div>
+</body>
+</html>

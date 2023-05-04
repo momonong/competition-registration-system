@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>運動報名系統</title>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</head>
+
+<body>
+    <h2> 運動報名系統 </h2>
+    <div class="container-fluid">
+        <button type="button" data-toggle="modal" class="btn btn-primary" data-target="#insert_book">新增</button>
+        <table class="table table-striped">
+            <thead>
+                {% for head in outheaders%}
+                <td>{{ head }}</td>
+                {% endfor %}
+            </thead>
+
+            <tbody>
+                {% for row in outdata %}
+                <tr>
+                    {% for col in row %}
+                    <td>{{ col }}</td>
+                    {% endfor %}
+                    <td align="right">
+                        <button type="submit" data-toggle="modal" class="btn btn-success" data-target="#update">修改 </button>
+                        <button type="submit" data-toggle="modal" class="btn btn-danger" data-target="#delete">刪除 </button>
+                    </td>     
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>運動報名系統</title>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</head>
+
+<body>
+    <h2> 運動報名系統 </h2>
+    <div class="container-fluid">
+        
+        <table class="table table-striped">
+            <thead>
+                {% for head in outheaders%}
+                <td>{{ head }}</td>
+                {% endfor %}
+                <td align="right">
+                    <button type="button" data-bs-toggle="modal" class="btn btn-primary" data-bs-target="#insert_person">
+                    新增
+                    </button>
+                </td>
+            </thead>
+
+            <tbody>
+                {% for row in outdata %}
+                <tr>
+                    {% for col in row %}
+                    <td>{{ col }}</td>
+                    {% endfor %}
+                    <td align="right">
+                        <button type="submit" data-bs-toggle="modal" class="btn btn-success" data-bs-target="#update">修改 </button>
+                        <button type="submit" data-bs-toggle="modal" class="btn btn-danger" data-bs-target="#delete">刪除 </button>
+                    </td>     
+                </tr>
+                {% endfor %}    
+            </tbody>
+        </table>
+        
+        <!-- Modal 1 for adding a person -->
+        <div class="modal fade" id="insert_person" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">新增人員</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                    </div>
+                    <form action="{{url_for('add_person')}}" method="post">
+                        <div class="modal-body">
+                            <div class="form-group ">
+                                <label for="school">學校</label>
+                                <input type="text" class="form-control" name="in_school" id="in_school" placeholder="學校" required/>
+                            </div>
+                            <div class="form-group ">
+                                <label for="school">姓名</label>
+                                <input type="text" class="form-control" name="in_name" id="in_name" placeholder="姓名" required />
+                            </div>
+                            <div class="form-group ">
+                                <label for="school">email</label>
+                                <input type="text" class="form-control" name="in_email" id="in_email" placeholder="email" />
+                            </div>
+                            <div class="form-group ">
+                                <label for="school">電話</label>
+                                <input type="text" class="form-control" name="in_phone" id="in_phone" placeholder="電話" />
+                            </div>
+                            <div class="form-group ">
+                                <label for="school">背號</label>
+                                <input type="text" class="form-control" name="in_jersey" id="in_jersey" placeholder="背號" />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-bs-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-primary">送出</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- End Modal 1 -->
+    </div>
+</body>
+
+</html>

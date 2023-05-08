@@ -5,7 +5,7 @@ import pandas as pd
 # Note: 
 # 1. 新增： ready
 # 2. 修改： ready
-# 3. 刪除： not ready
+# 3. 刪除： ready
 # 4. 附件： not ready
 
 # 連接資料庫
@@ -52,6 +52,15 @@ def edit_person(pid):
         sql = f'''UPDATE registration SET school_name='{school}',team_id='{team_id}',student_name='{name}',
             email='{email}',phone='{phone}',jersey_number='{jersey_number}',update_time='now()' 
             WHERE pid='{pid}' '''
+        engine.execute(sql)
+
+    return redirect(url_for("index"))
+
+#刪除人員資料
+@app.route('/del_person/<pid>', methods=['GET','POST'])
+def del_person(pid):
+    if request.method == "POST":
+        sql = f'''DELETE FROM registration WHERE pid='{pid}' '''
         engine.execute(sql)
 
     return redirect(url_for("index"))

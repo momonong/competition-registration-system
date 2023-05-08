@@ -36,7 +36,7 @@
                         <button type="submit" data-bs-toggle="modal" class="btn btn-success btn-sm" data-bs-target="#update">修改 </button>
                         --> 
                         <a href="/edit_person/{{row.pid}}" data-bs-toggle="modal" class="btn btn-success btn-sm" data-bs-target="#update_person{{row.pid}}">修改</a>
-                        <button type="submit" data-bs-toggle="modal" class="btn btn-danger btn-sm" data-bs-target="#delete">刪除 </button>
+                        <a href="/del_person/{{row.pid}}" data-bs-toggle="modal" class="btn btn-danger btn-sm" data-bs-target="#del_person{{row.pid}}">刪除</a>
                     </td>     
                 </tr>
                  
@@ -89,6 +89,54 @@
                 </div>
                 <!-- End Modal 2 -->
 
+                <!-- Modal 3 for deleting person data-->
+                <div class="modal fade" id="del_person{{row.pid}}" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="ModalUpdateLabel">確定刪除人員資料？</h4>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                            </div>
+                            <form action="/del_person/{{row.pid}}" method="post">
+                                <div class="modal-body">
+                                    <div class="form-group ">
+                                        <label for="in_pid">身分證字號<font color="red"><sup>*</sup></font></label>
+                                        <input type="text" pattern="^[a-zA-Z][1-2]\d{8}$" class="form-control" name="in_pid" id="in_pid" placeholder="身分證字號" value="{{row.pid}}" disabled/>
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="in_school">學校<font color="red"><sup>*</sup></font></label>
+                                        <input type="text" class="form-control" name="in_school" id="in_school" placeholder="學校" value="{{row.school_name}}"disabled/>
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="in_teamid">隊名<font color="red"><sup>*</sup></font></label>
+                                        <input type="text" class="form-control" name="in_teamid" id="in_teamid" placeholder="隊名" value="{{row.team_id}}"disabled/>
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="in_name">姓名<font color="red"><sup>*</sup></font></label>
+                                        <input type="text" class="form-control" name="in_name" id="in_name" placeholder="姓名" value="{{row.student_name}}"disabled />
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="in_email">email</label>
+                                        <input type="email" class="form-control" name="in_email" id="in_email" value="{{row.email}}" placeholder="email" disabled/>
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="in_phone">電話</label>
+                                        <input type="text" class="form-control" name="in_phone" id="in_phone" value="{{row.phone}}" placeholder="電話" disabled/>
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="in_jersey">背號</label>
+                                        <input type="text" class="form-control" name="in_jersey" id="in_jersey" value="{{row.背號}}" placeholder="背號" disabled/>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">取消</button>
+                                    <button type="submit" class="btn btn-danger">確定</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Modal 3 -->
                 {% endfor %}  
             </tbody> 
         </table>

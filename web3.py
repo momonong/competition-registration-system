@@ -9,7 +9,7 @@ import pandas as pd
 # 4. 附件： not ready
 
 # 連接資料庫
-engine = create_engine('postgresql://admin:123456@127.0.0.1:5432/postgres')
+engine = create_engine('postgresql://admin:123456@127.0.0.1:5432/sport')
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 # 連接到首頁
@@ -66,4 +66,4 @@ def del_person(pid):
     return redirect(url_for("index"))
 
 if __name__ == '__main__':
-   app.run(port=5000,debug=True)
+   app.run(host='0.0.0.0',port=8000,debug=True)

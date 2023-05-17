@@ -11,6 +11,7 @@ import pandas as pd
 # 連接資料庫
 engine = create_engine('postgresql://admin:123456@127.0.0.1:5432/sport')
 app = Flask(__name__, template_folder='templates', static_folder='static')
+app.secret_key = 'fi13dE9fafkd9a0afklm81WEEd'
 
 # 連接到首頁
 @app.route('/')
@@ -32,10 +33,19 @@ def add_person():
         email = request.values['in_email'].strip()
         phone = request.values['in_phone'].strip()
         jersey_number = request.values['in_jersey'].strip()
-        sql = f'''insert into registration(pid, school_name, team_id, student_name, email, phone, jersey_number) 
-            values ('{pid}', '{school}','{team_id}','{name}','{email}','{phone}','{jersey_number}')'''
-        engine.execute(sql)
-        #flash("新增人員成功")
+        conn = engine.connect()
+        trans = conn.begin()
+        try:
+            sql = f'''insert into registration(pid, school_name, team_id, student_name, email, phone, jersey_number) 
+                values ('{pid}', '{school}','{team_id}','{name}','{email}','{phone}','{jersey_number}')'''
+            conn.execute(sql)
+            trans.commit()
+            flash("新增人員成功","primary")
+        except Exception as e:
+            trans.rollback()
+            flash(f"新增人員失敗,{str(e)}","danger")
+        finally:
+            conn.close()
         #print(school+name+email)
     return redirect(url_for("index"))
 
@@ -49,19 +59,39 @@ def edit_person(pid):
         email = request.values['in_email'].strip()
         phone = request.values['in_phone'].strip()
         jersey_number = request.values['in_jersey'].strip()
-        sql = f'''UPDATE registration SET school_name='{school}',team_id='{team_id}',student_name='{name}',
-            email='{email}',phone='{phone}',jersey_number='{jersey_number}',update_time='now()' 
-            WHERE pid='{pid}' '''
-        engine.execute(sql)
-
+        conn = engine.connect()
+        trans = conn.begin()
+        try:
+            sql = f'''UPDATE registration SET school_name='{school}',team_id='{team_id}',student_name='{name}',
+                email='{email}',phone='{phone}',jersey_number='{jersey_number}',update_time='now()' 
+                WHERE pid='{pid}' '''
+            conn.execute(sql)
+            trans.commit()
+            flash("修改人員成功","primary")
+        except Exception as e:
+            trans.rollback()
+            flash(f"修改人員失敗,{str(e)}","danger")
+        finally:
+            conn.close()
+    
     return redirect(url_for("index"))
 
 #刪除人員資料
 @app.route('/del_person/<pid>', methods=['GET','POST'])
 def del_person(pid):
     if request.method == "POST":
-        sql = f'''DELETE FROM registration WHERE pid='{pid}' '''
-        engine.execute(sql)
+        conn = engine.connect()
+        trans = conn.begin()
+        try:
+            sql = f'''DELETE FROM registration WHERE pid='{pid}' '''
+            conn.execute(sql)
+            trans.commit()
+            flash("刪除人員成功","primary")
+        except Exception as e:
+            trans.rollback()
+            flash(f"刪除人員失敗,{str(e)}","danger")
+        finally:
+            conn.close()
 
     return redirect(url_for("index"))
 

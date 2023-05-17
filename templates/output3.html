@@ -11,12 +11,24 @@
 
 <body>
     <h2> 運動報名系統 </h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container-fluid">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{category}}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <div class="container-fluid">
         <!-- start 得到隊員表格資料 -->
         <table class="table table-striped table-bordered" id="persontable">
             <thead>
                 {% for head in outheaders%}
-                <td>{{ head }}</td>
+                    <td>{{ head }}</td>
                 {% endfor %}
                 <td align="right">
                     <button type="button" data-bs-toggle="modal" class="btn btn-primary btn-sm" data-bs-target="#insert_person">

@@ -11,6 +11,11 @@
         a{text-decoration:none}
         a:hover{text-decoration:none}
     </style>
+    <script>
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
 </head>
 
 <body>
@@ -63,7 +68,7 @@
                     {% for cell in row %}
                     <td>
                         {% if cell == 'Y' %}
-                            <a href="{{ url_for('showfile', pid=row.pid) }}" target="_blank">📎</a>
+                            <a href="{{ url_for('showfile', pid=row.pid) }}" data-toggle="tooltip" title="查看身份證件檔案" target="_blank">📎</a>
                         {% else %}
                             {{ cell }}
                         {% endif %}   

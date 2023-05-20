@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS public.registration
     phone character varying COLLATE pg_catalog."default",
     jersey_number character varying COLLATE pg_catalog."default",
 	update_time timestamp without time zone default current_timestamp,
+    pid_filename character varying COLLATE pg_catalog."default",
+    pid_data bytea,
 	constraint registration_pkey primary key (pid)
 )
 

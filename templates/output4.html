@@ -24,7 +24,8 @@
         {% if messages %}
             <div class="container-fluid">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{category}}" role="alert">
+                    <div class="alert alert-{{category}} alert-dismissible" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         {{ message }}
                     </div>
                 {% endfor %}
@@ -36,6 +37,9 @@
         <!-- start 得到隊員表格資料 -->
         <table class="table table-striped table-bordered" id="persontable">
             <thead>
+                <td>
+                    序號
+                </td>
                 {% for head in outheaders%}
                     <td>
                         {% if head == 'pid' %}
@@ -65,10 +69,17 @@
             <tbody>
                 {% for row in outdata %}
                 <tr>
+                    <td>
+                        {{loop.index}}
+                    </td>
                     {% for cell in row %}
                     <td>
-                        {% if cell == 'Y' %}
-                            <a href="{{ url_for('showfile', pid=row.pid) }}" data-toggle="tooltip" title="查看身份證件檔案" target="_blank">📎</a>
+                        {% if cell == '_Y' %}
+                            <a href="{{ url_for('showfile', ftype='PID',pid=row.pid) }}" data-toggle="tooltip" title="查看身份證件檔案" target="_blank">📎</a>
+                        {% elif cell == '_S' %}
+                            <a href="{{ url_for('showfile', ftype='STUID',pid=row.pid) }}" data-toggle="tooltip" title="查看學生證件檔案" target="_blank">📎</a>
+                        {% elif cell == '_E' %}
+                            <a href="{{ url_for('showfile', ftype='ENROLL',pid=row.pid) }}" data-toggle="tooltip" title="查看在學證明檔案" target="_blank">📎</a>
                         {% else %}
                             {{ cell }}
                         {% endif %}   
@@ -112,26 +123,54 @@
                                     </div>
                                     <div class="form-group ">
                                         <label for="in_phone">電話</label>
-                                        <input type="text" class="form-control" name="in_phone" id="in_phone" value="{{row.phone}}" placeholder="電話" />
+                                        <input type="number" class="form-control" name="in_phone" id="in_phone" value="{{row.phone}}" placeholder="電話" />
                                     </div>
                                     <div class="form-group ">
                                         <label for="in_jersey">背號</label>
-                                        <input type="text" class="form-control" name="in_jersey" id="in_jersey" value="{{row.jersey_number}}" placeholder="背號" />
+                                        <input type="number" class="form-control" name="in_jersey" id="in_jersey" value="{{row.jersey_number}}" placeholder="背號" />
                                     </div>
                                     <div class="form-group ">
                                         <label for="in_file">身份證件檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub></font></label>
-                                        {% if row.身 =='Y' %}
+                                        {% if row.身 =='_Y' %}
                                             <div class="form-control" >
-                                                <a href="{{ url_for('showfile', pid=row.pid) }}" target="_blank" >檢視已上傳檔案</a>
-                                                <input type="checkbox" name="in_rmexistfile" id="in_rmexistfile" value="rm"/>
-                                                <label for="in_rmexistfile">移除已上傳檔案</label>
+                                                <a href="{{ url_for('showfile', ftype='PID', pid=row.pid) }}" target="_blank" >檢視已上傳檔案</a>
+                                                <input type="checkbox" name="in_rmpidexistfile" id="in_rmpidexistfile" value="PID"/>
+                                                <label for="in_rmpidexistfile">移除已上傳檔案</label>
                                             </div>
                                         {% endif %}
                                         <div class="form-control" >
-                                            <input type="file" accept="image/jpeg, image/png, image/heic, application/pdf" name="in_file" id="in_file_{{loop.index}}" value="{{row.pid}}" placeholder="身份證件檔案" />
-                                            <button type="button" class="btn btn-link" onclick="document.getElementById('in_file_{{loop.index}}').value = ''">不要選擇檔案</button>
+                                            <input type="file" accept="image/jpeg, image/png, image/heic, application/pdf" name="in_file_pid" id="in_file_pid{{loop.index}}" placeholder="身份證件檔案" />
+                                            <button type="button" class="btn btn-link" onclick="document.getElementById('in_file_pid{{loop.index}}').value = ''">不要選擇檔案</button>
                                         </div>
-                                    </div>                                    
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="in_file">學生證件檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub></font></label>
+                                        {% if row.學 =='_S' %}
+                                            <div class="form-control" >
+                                                <a href="{{ url_for('showfile', ftype='STUID', pid=row.pid) }}" target="_blank" >檢視已上傳檔案</a>
+                                                <input type="checkbox" name="in_rmstuexistfile" id="in_rmstuexistfile" value="STUID"/>
+                                                <label for="in_rmstuexistfile">移除已上傳檔案</label>
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-control" >
+                                            <input type="file" accept="image/jpeg, image/png, image/heic, application/pdf" name="in_file_stuid" id="in_file_stuid{{loop.index}}" value="{{row.pid}}" placeholder="學生證件檔案" />
+                                            <button type="button" class="btn btn-link" onclick="document.getElementById('in_file_stuid{{loop.index}}').value = ''">不要選擇檔案</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group ">
+                                        <label for="in_file">在學證明檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub></font></label>
+                                        {% if row.在 =='_E' %}
+                                            <div class="form-control" >
+                                                <a href="{{ url_for('showfile', ftype='ENROLL', pid=row.pid) }}" target="_blank" >檢視已上傳檔案</a>
+                                                <input type="checkbox" name="in_rmenrollexistfile" id="in_rmenrollexistfile" value="ENROLL"/>
+                                                <label for="in_rmenrollexistfile">移除已上傳檔案</label>
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-control" >
+                                            <input type="file" accept="image/jpeg, image/png, image/heic, application/pdf" name="in_file_enroll" id="in_file_enroll{{loop.index}}" value="{{row.pid}}" placeholder="在學證明檔案" />
+                                            <button type="button" class="btn btn-link" onclick="document.getElementById('in_file_enroll{{loop.index}}').value = ''">不要選擇檔案</button>
+                                        </div>
+                                    </div>                                       
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-bs-dismiss="modal">取消</button>
@@ -175,11 +214,11 @@
                                     </div>
                                     <div class="form-group ">
                                         <label for="in_phone">電話</label>
-                                        <input type="text" class="form-control" name="in_phone" id="in_phone" value="{{row.phone}}" placeholder="電話" disabled/>
+                                        <input type="number" class="form-control" name="in_phone" id="in_phone" value="{{row.phone}}" placeholder="電話" disabled/>
                                     </div>
                                     <div class="form-group ">
                                         <label for="in_jersey">背號</label>
-                                        <input type="text" class="form-control" name="in_jersey" id="in_jersey" value="{{row.jersey_number}}" placeholder="背號" disabled/>
+                                        <input type="number" class="form-control" name="in_jersey" id="in_jersey" value="{{row.jersey_number}}" placeholder="背號" disabled/>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -227,17 +266,31 @@
                             </div>
                             <div class="form-group ">
                                 <label for="in_phone">電話</label>
-                                <input type="text" class="form-control" name="in_phone" id="in_phone" placeholder="電話" />
+                                <input type="number" class="form-control" name="in_phone" id="in_phone" placeholder="電話" />
                             </div>
                             <div class="form-group ">
                                 <label for="in_jersey">背號</label>
-                                <input type="text" class="form-control" name="in_jersey" id="in_jersey" placeholder="背號" />
+                                <input type="number" class="form-control" name="in_jersey" id="in_jersey" placeholder="背號" />
                             </div>
                             <div class="form-group">
                                 <label for="in_file">身份證件檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub></font></label> 
                                 <div class="form-control">    
-                                    <input type="file" accept="image/jpeg, image/png, image/heic, application/pdf" name="in_file" id="in_file" placeholder="身份證件檔案" />
-                                    <button type="button" class="btn btn-link" onclick="document.getElementById('in_file').value = ''">不要選擇檔案</button>
+                                    <input type="file" accept="image/jpeg, image/png, image/heic, application/pdf" name="in_file_pid" id="in_file_pid" placeholder="身份證件檔案" />
+                                    <button type="button" class="btn btn-link" onclick="document.getElementById('in_file_pid').value = ''">不要選擇檔案</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="in_file">學生證件檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub></font></label> 
+                                <div class="form-control">    
+                                    <input type="file" accept="image/jpeg, image/png, image/heic, application/pdf" name="in_file_stuid" id="in_file_stuid" placeholder="學生證件檔案" />
+                                    <button type="button" class="btn btn-link" onclick="document.getElementById('in_file_stuid').value = ''">不要選擇檔案</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="in_file">在學證明檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub></font></label> 
+                                <div class="form-control">    
+                                    <input type="file" accept="image/jpeg, image/png, image/heic, application/pdf" name="in_file_enroll" id="in_file_enroll" placeholder="在學證明檔案" />
+                                    <button type="button" class="btn btn-link" onclick="document.getElementById('in_file_enroll').value = ''">不要選擇檔案</button>
                                 </div>
                             </div>
                         </div>

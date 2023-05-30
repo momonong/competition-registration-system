@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>運動報名系統</title>
+  <meta charset='utf-8'>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+  
+  <script>
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script>  
+</head>
+
+<body>
+  <header>
+    <!-- Add your header content here -->
+    
+    <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">🏀 報名首頁</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('editmember', team_id=current_user.team_id ) }}">編輯隊員</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('logout') }}">登出</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('mylogin') }}" data-bs-toggle="modal" data-bs-target="#loginform" >登入</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+        {% if current_user.is_authenticated %}
+        <span class="navbar-text">
+          您好：{{ current_user.name }}({{ current_user.team_id }})
+          {% for role in current_user.roles%}
+            ({{role.name}})
+          {% endfor %}
+        </span>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+  <!-- Modal for login -->
+  <div class="container-fluid">
+    <div class="modal fade" id="loginform" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h4 class="modal-title" id="ModalLogin">登入</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+              </div>
+              <form method="POST" action="{{ url_for('mylogin') }}">
+                <div class="modal-body"> 
+                  <div class="form-group">
+                      <label for="email">Email:</label>
+                      <input type="email" class="form-control" name="email" id="email" placeholder="Enter email" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="password">密碼:</label>
+                      <input type="password" class="form-control" name="password" id="password" placeholder="Enter password" required>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-bs-dismiss="modal">取消</button>
+                  <button type="submit" class="btn btn-primary" >送出</button>
+                </div>
+                <div id="errorMessage" style="color: red;"></div> 
+              </form>
+              
+          </div>
+      </div>
+  </div>
+  <!-- End of Modal for login -->
+    {% block content %}
+    {% endblock %}
+  </div>
+  <footer>
+    <!-- Add your footer content here -->
+  </footer>
+
+</body>
+</html>

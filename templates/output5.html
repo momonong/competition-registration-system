@@ -230,7 +230,7 @@
                         <div class="modal-body">
                             <div class="form-group ">
                                 <label for="in_pid">身分證字號<font color="red"><sup>*</sup></font></label>
-                                <input type="text" pattern="^[a-zA-Z][1-2]\d{8}$" class="form-control" name="in_pid" id="in_pid" placeholder="身分證字號" required/>
+                                <input type="text" oninput="convertToUpperCase()" pattern="^[a-zA-Z][1-2]\d{8}$" class="form-control" name="in_pid" id="new_pid" placeholder="身分證字號" required/>
                             </div>
                             <div class="form-group ">
                                 <label for="in_school">學校<font color="red"><sup>*</sup></font></label>

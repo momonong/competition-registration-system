@@ -134,11 +134,11 @@ def editmember(team_id=''):
 @app.route('/add_person', methods=['GET','POST'])
 def add_person():
     if request.method == "POST":
-        pid = request.values['in_pid'].strip()  #去除頭尾空白字元
+        pid = request.values['in_pid'].upper().strip()  #去除頭尾空白字元
         school = request.values['in_school'].strip()
         team_id = request.values['in_teamid'].strip()
         name = request.values['in_name'].strip()
-        email = request.values['in_email'].strip()
+        email = request.values['in_email'].lower().strip()
         phone = request.values['in_phone'].strip()
         jersey_number = request.values['in_jersey'].strip()
 
@@ -190,7 +190,7 @@ def edit_person(pid):
         school = request.values['in_school'].strip()
         team_id = request.values['in_teamid'].strip()
         name = request.values['in_name'].strip()
-        email = request.values['in_email'].strip()
+        email = request.values['in_email'].lower().strip()
         phone = request.values['in_phone'].strip()
         jersey_number = request.values['in_jersey'].strip()
 

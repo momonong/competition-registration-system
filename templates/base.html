@@ -12,14 +12,23 @@
     $(function () {
       $('[data-toggle="tooltip"]').tooltip();
     });
-  </script>  
+  </script> 
+  <script>
+    function convertToUpperCase() {
+      var input = document.getElementById('new_pid');
+      input.value = input.value.toUpperCase();
+    }
+  </script>
+  
 </head>
 
 <body>
   <header>
     <!-- Add your header content here -->
-    
-    <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
+    <div class="container-fluid mt-3">
+      <h2 class="text-center">{{ current_user.team_id }}</h2>
+    </div>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-primary sticky-top">
       <div class="container-fluid">
         <a class="navbar-brand" href="/">🏀 報名首頁</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

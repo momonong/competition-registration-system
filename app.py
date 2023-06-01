@@ -7,7 +7,7 @@ from flask_security import UserMixin, RoleMixin, roles_accepted, Security, SQLAl
 from sqlalchemy import create_engine
 from io import BytesIO
 from urllib.parse import quote
-from web5 import app as web5_app
+import email_validator
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:123456@127.0.0.1:5432/sport'

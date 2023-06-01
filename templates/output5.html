@@ -86,19 +86,19 @@
                             <form action="{{ url_for('edit_person', pid=row.pid) }}" method="post" enctype="multipart/form-data">
                                 <div class="modal-body">
                                     <div class="form-group ">
-                                        <label for="in_pid">身分證字號<font color="red"><sup>*</sup></font></label>
+                                        <label for="in_pid" class="required-label">身分證字號</label>
                                         <input type="text" pattern="^[a-zA-Z][1-2]\d{8}$" class="form-control" name="in_pid" id="in_pid" placeholder="身分證字號" value="{{row.pid}}" disabled/>
                                     </div>
                                     <div class="form-group ">
-                                        <label for="in_school">學校<font color="red"><sup>*</sup></font></label>
+                                        <label for="in_school" class="required-label">學校</label>
                                         <input type="text" class="form-control" name="in_school" id="in_school" placeholder="學校" value="{{row.school_name}}"required/>
                                     </div>
                                     <div class="form-group ">
-                                        <label for="in_teamid">隊名<font color="red"><sup>*</sup></font></label>
+                                        <label for="in_teamid" class="required-label">隊名</label>
                                         <input type="text" class="form-control" name="in_teamid" id="in_teamid" placeholder="隊名" value="{{row.team_id}}"required/>
                                     </div>
                                     <div class="form-group ">
-                                        <label for="in_name">姓名<font color="red"><sup>*</sup></font></label>
+                                        <label for="in_name" class="required-label">姓名</label>
                                         <input type="text" class="form-control" name="in_name" id="in_name" placeholder="姓名" value="{{row.student_name}}"required />
                                     </div>
                                     <div class="form-group ">
@@ -110,8 +110,8 @@
                                         <input type="number" class="form-control" name="in_phone" id="in_phone" value="{{row.phone}}" placeholder="電話" />
                                     </div>
                                     <div class="form-group ">
-                                        <label for="in_jersey">背號</label>
-                                        <input type="number" class="form-control" name="in_jersey" id="in_jersey" value="{{row.jersey_number}}" placeholder="背號" />
+                                        <label for="in_jersey " class="required-label">背號</label>
+                                        <input type="number" class="form-control" name="in_jersey" id="in_jersey" value="{{row.jersey_number}}" placeholder="背號" required/>
                                     </div>
                                     <div class="form-group ">
                                         <label for="in_file">身份證件檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub></font></label>
@@ -229,19 +229,19 @@
                     <form action="{{url_for('add_person')}}" method="post" enctype="multipart/form-data">
                         <div class="modal-body">
                             <div class="form-group ">
-                                <label for="in_pid">身分證字號<font color="red"><sup>*</sup></font></label>
+                                <label for="in_pid" class="required-label">身分證字號</label>
                                 <input type="text" oninput="convertToUpperCase()" pattern="^[a-zA-Z][1-2]\d{8}$" class="form-control" name="in_pid" id="new_pid" placeholder="身分證字號" required/>
                             </div>
                             <div class="form-group ">
-                                <label for="in_school">學校<font color="red"><sup>*</sup></font></label>
+                                <label for="in_school" class="required-label">學校</label>
                                 <input type="text" class="form-control" name="in_school" id="in_school" placeholder="學校" required/>
                             </div>
                             <div class="form-group ">
-                                <label for="in_teamid">隊名<font color="red"><sup>*</sup></font></label>
+                                <label for="in_teamid" class="required-label">隊名</label>
                                 <input type="text" class="form-control" name="in_teamid" id="in_teamid" placeholder="隊名" required/>
                             </div>
                             <div class="form-group ">
-                                <label for="in_name">姓名<font color="red"><sup>*</sup></font></label>
+                                <label for="in_name" class="required-label">姓名</label>
                                 <input type="text" class="form-control" name="in_name" id="in_name" placeholder="姓名" required />
                             </div>
                             <div class="form-group ">
@@ -253,8 +253,8 @@
                                 <input type="number" class="form-control" name="in_phone" id="in_phone" placeholder="電話" />
                             </div>
                             <div class="form-group ">
-                                <label for="in_jersey">背號</label>
-                                <input type="number" class="form-control" name="in_jersey" id="in_jersey" placeholder="背號" />
+                                <label for="in_jersey" class="required-label">背號</label>
+                                <input type="number" class="form-control" name="in_jersey" id="in_jersey" placeholder="背號" required />
                             </div>
                             <div class="form-group">
                                 <label for="in_file">身份證件檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub></font></label> 

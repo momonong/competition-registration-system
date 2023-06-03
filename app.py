@@ -17,6 +17,15 @@ app.config['SECURITY_REGISTERABLE'] = True
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 app.config['ALLOWED_EXTENSIONS'] = {'PDF', 'JPG', 'JPEG', 'PNG', 'HEIC'}
 app.config['MAX_FILE_SIZE'] =  16 * 1024 * 1024  # 16MB 的位元組
+app.config['GAME'] = {'賽事名稱':'2023興傳盃公益籃球邀請賽', '主辦':'國立中興大學EMBA校友會',
+                      '協辦':'國立中興大學EMBA學生會、國立中興大學EMBA辦公室',
+                      '執行':'國立中興大學EMBA籃球社',
+                      '比賽地點':'國立中興大學體育館B1及2F籃球場（台中市南區興大路145號）',
+                      '比賽開始日期':'2023/8/19','比賽結束日期':'2023/8/20',
+                      '參賽組別':{'挑戰組(不限齡)':'最多16隊','菁英組(43歲以上)':'最多8隊'},
+                      '開始報名日期':'即日起','截止報名日期':'2023/5/31 晚上24:00',
+                      '選手之夜報名截止時間':'2023/6/9 晚上24:00',
+                      '賽事狀態':'報名截止','賽事管理員':'vicfenny@gmail.com'}
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -65,7 +74,8 @@ def load_user(user_id):
 # Routes
 @app.route('/')
 def home():
-    return render_template('home.html')
+    game_content = app.config['GAME']
+    return render_template('home.html',game_content=game_content)
 
 @app.route('/admin')
 @login_required
@@ -110,6 +120,10 @@ def logout():
     logout_user()
     flash('登出成功！', 'success')
     return redirect(url_for('home'))
+
+@app.route('/gamerule')
+def gamerule():
+    return render_template('rule.html')
 
 # member data database CRUD
 @app.route('/editmember/', methods=['GET', 'POST'])

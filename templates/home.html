@@ -1,20 +1,62 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="mt-4 p-5 bg-secondary text-white rounded">
-    <h3 class="text-center">Welcome! 歡迎光臨運動報名系統!</h3>
-    <p class="text-center"> 這裡提供一個讓大家方便報名運動競賽的網頁，希望大家喜歡用！ </p>
-</div>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="container">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{category}} alert-dismissible" role="alert">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        {{ message }}
-                    </div>
-                {% endfor %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+    <div class="container">
+        {% for category, message in messages %}
+            <div class="alert alert-{{category}} alert-dismissible" role="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                {{ message }}
             </div>
-        {% endif %}
-    {% endwith %}
+        {% endfor %}
+    </div>
+{% endif %}
+{% endwith %}
+<div class="container mt-3">
+    <div class="row">
+        <div class="c0l-md-2"></div>
+        <div class="c0l-md-8">
+            <div class="card bg-light text-dark">
+                <div class="card-header">
+                    <h3 class="text-center">{{game_content['賽事名稱']}}</h3>
+                </div>
+                <div class="card-body" style="text-align: center;">
+                    <table style="display: inline-block;">
+                    <tr>
+                        <td align="right">主辦單位：</td><td align="left">{{game_content['主辦']}}</td>
+                    </tr> 
+                    <tr>
+                        <td align="right">協辦單位：</td><td align="left">{{game_content['協辦']}}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">執行單位：</td><td align="left">{{game_content['執行']}}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">比賽地點：</td><td align="left">{{game_content['比賽地點']}}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">比賽日期：</td><td align="left">{{game_content['比賽開始日期']}} - {{game_content['比賽結束日期']}}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">參賽組別：</td><td align="left">挑戰組(不限齡)-{{game_content['參賽組別']['挑戰組(不限齡)']}}，菁英組(43歲以上)-{{game_content['參賽組別']['菁英組(43歲以上)']}}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">開始報名日期：</td><td align="left">{{game_content['開始報名日期']}}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">截止報名日期：</td><td align="left">{{game_content['截止報名日期']}}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">選手之夜報名截止時間：</td><td align="left">{{game_content['選手之夜報名截止時間']}}</td>
+                    </tr>
+                    <tr>
+                        <td align="right">賽事狀態：</td><td align="left">{{game_content['賽事狀態']}}</td>
+                    </tr>
+                    </table> 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -7,7 +7,8 @@ from flask_security import UserMixin, RoleMixin, roles_accepted, Security, SQLAl
 from sqlalchemy import create_engine
 from io import BytesIO
 from urllib.parse import quote
-from web5 import app as web5_app
+import pandas as pd
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:123456@127.0.0.1:5432/sport'
@@ -125,7 +126,53 @@ def logout():
 def gamerule():
     return render_template('rule.html')
 
+# query all teams 
+@app.route('/get_teams/<game_id>', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('admin', 'gamemanager', 'user')
+def get_teams(game_id):
+    if current_user.has_role('admin') or current_user.has_role('gamemanager'):
+        condition = ''
+    else:    
+        condition = f" AND contact_pid='{current_user.id}'"
+    sql = f'''SELECT team_id, team_name 報名單位, group_id 參賽組別, status 狀態, qualified 是否合格 FROM team 
+        WHERE game_id='{game_id}' {condition} '''
+    df = pd.DataFrame(engine.execute(sql))
+    df.index += 1 
+    # 加'報名單位' hyperlink 至 editteam_member 頁面
+    df['報名單位'] = df.apply(lambda x: f"<a href={url_for('editteam_member',team_id=(x.team_id))}>{x.報名單位}</a>", axis=1)
+    df = df.drop('team_id', axis=1)
+    # 將dataframe 的 是否合格 column 內容為false 置換成“否”, true 置換成“是”,
+    df['是否合格'] = df['是否合格'].apply(lambda x: '是' if x else '否')
+    # 將html table head 文字靠左對齊
+    data_html = df.to_html(classes=['table table-border table-striped'], escape=False).replace('<th', '<th style="text-align: left;"')
+        
+    return render_template('show_teams.html', outgame_id=game_id, outdata=data_html)
+
 # member data database CRUD
+@app.route('/editteam_member/', methods=['GET', 'POST'])
+@app.route('/editteam_member/<int:team_id>', methods=['GET', 'POST'])
+@login_required
+@roles_accepted('admin', 'gamemanager', 'user')
+def editteam_member(team_id=''):
+    '''if current_user.has_role('admin') or current_user.has_role('gamemanager'):
+        condition = ''
+    else:    
+        condition = f"WHERE team_num={team_id}"'''
+    sql = f'''SELECT pid,school_name,team_id,student_name,email,phone,jersey_number,
+        CASE WHEN pid_data IS NOT NULL THEN '_Y' ELSE '' end as 身,
+        CASE WHEN st_data IS NOT NULL THEN '_S' ELSE '' end as 學, 
+        CASE WHEN er_data IS NOT NULL THEN '_E' ELSE '' end as 在
+        FROM registration WHERE team_num={team_id} ORDER BY team_num, update_time desc'''
+    data = engine.execute(sql)
+    column_names = data.keys()
+    sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,name 聯絡人,email 電子郵件,group_id 參賽組別,coach 教練,head_coach 領隊,team_captain 隊長,
+            status 狀態,CASE WHEN qualified IS true THEN '是' ELSE '否' END as 是否合格
+            FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
+    team_data = engine.execute(sql_team).fetchone()
+    team_column_names = team_data.keys()
+    return render_template('output6.html', outdata=data, outheaders=column_names,outteam=team_data,outteamheader=team_column_names)
+
 @app.route('/editmember/', methods=['GET', 'POST'])
 @app.route('/editmember/<team_id>', methods=['GET', 'POST'])
 @login_required
@@ -138,8 +185,8 @@ def editmember(team_id=''):
     sql = f'''SELECT pid,school_name,team_id,student_name,email,phone,jersey_number,
         CASE WHEN pid_data IS NOT NULL THEN '_Y' ELSE '' end as 身,
         CASE WHEN st_data IS NOT NULL THEN '_S' ELSE '' end as 學, 
-        CASE WHEN er_data IS NOT NULL THEN '_E' ELSE '' end as 在 
-        FROM registration {condition} ORDER BY update_time desc'''
+        CASE WHEN er_data IS NOT NULL THEN '_E' ELSE '' end as 在
+        FROM registration {condition} ORDER BY team_id, update_time desc'''
     data = engine.execute(sql)
     column_names = data.keys()
     return render_template('output5.html', outdata=data, outheaders=column_names)
@@ -328,5 +375,5 @@ def showfile(ftype,pid):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
 

@@ -12,14 +12,31 @@
     $(function () {
       $('[data-toggle="tooltip"]').tooltip();
     });
-  </script>  
+  </script> 
+  <script>
+    function convertToUpperCase() {
+      var input = document.getElementById('new_pid');
+      input.value = input.value.toUpperCase();
+    }
+  </script>
+  <style>
+    .required-label::after {
+      content: "*";
+      font-size: 12px;
+      vertical-align: super;
+      color: red;
+    }
+  </style>
+  
 </head>
 
 <body>
   <header>
-    <!-- Add your header content here -->
-    
-    <nav class="navbar navbar-expand-sm navbar-dark bg-primary">
+    <!-- Add your header content here 
+    <div class="container-fluid mt-3">
+      <h2 class="text-center"></h2>
+    </div> -->
+    <nav class="navbar navbar-expand-sm navbar-dark bg-primary ">
       <div class="container-fluid">
         <a class="navbar-brand" href="/">🏀 報名首頁</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,7 +44,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('gamerule') }}">競賽規程</a>
+            </li>
             {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('get_teams', game_id='2023興傳盃公益籃球邀請賽' ) }}">已報名資料</a>
+            </li>
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('editmember', team_id=current_user.team_id ) }}">編輯隊員</a>
             </li>

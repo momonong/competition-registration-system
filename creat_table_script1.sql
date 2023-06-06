@@ -78,3 +78,28 @@ TABLESPACE pg_default;
 ALTER TABLE public.roles_users
     OWNER to admin;
     
+-- Table: public.team
+
+-- DROP TABLE public.team;
+
+CREATE TABLE IF NOT EXISTS public.team
+(
+    team_id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    team_name character varying COLLATE pg_catalog."default" NOT NULL,
+    game_id character varying COLLATE pg_catalog."default" NOT NULL,
+    group_id character varying COLLATE pg_catalog."default" NOT NULL,
+    contact_pid integer NOT NULL,
+    coach character varying COLLATE pg_catalog."default",
+    head_coach character varying COLLATE pg_catalog."default",
+    team_captain character varying COLLATE pg_catalog."default",
+    status character varying COLLATE pg_catalog."default" NOT NULL,
+    qualified boolean NOT NULL DEFAULT false,
+    update_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Team_pkey" PRIMARY KEY (team_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.team
+    OWNER to admin;
+    

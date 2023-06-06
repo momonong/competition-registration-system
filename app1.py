@@ -150,20 +150,26 @@ def get_teams(game_id):
     return render_template('show_teams.html', outgame_id=game_id, outdata=data_html)
 
 # member data database CRUD
+def get_teamid_fm_pid(pid):
+    sql = f'''SELECT team_id FROM team WHERE {current_user.id}=team.contact_pid'''
+    data = engine.execute(sql).fetchone()
+    return data['team_id']
+
 @app.route('/editteam_member/', methods=['GET', 'POST'])
 @app.route('/editteam_member/<int:team_id>', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'gamemanager', 'user')
 def editteam_member(team_id=''):
-    '''if current_user.has_role('admin') or current_user.has_role('gamemanager'):
+    if current_user.has_role('admin') or current_user.has_role('gamemanager'):
         condition = ''
-    else:    
-        condition = f"WHERE team_num={team_id}"'''
+    else:
+        team_id = get_teamid_fm_pid(current_user.id) 
+        condition =  f"WHERE team_num={team_id}"
     sql = f'''SELECT pid,school_name,team_id,student_name,email,phone,jersey_number,
         CASE WHEN pid_data IS NOT NULL THEN '_Y' ELSE '' end as 身,
         CASE WHEN st_data IS NOT NULL THEN '_S' ELSE '' end as 學, 
         CASE WHEN er_data IS NOT NULL THEN '_E' ELSE '' end as 在
-        FROM registration WHERE team_num={team_id} ORDER BY team_num, update_time desc'''
+        FROM registration {condition} ORDER BY team_num, update_time desc'''
     data = engine.execute(sql)
     column_names = data.keys()
     sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,name 聯絡人,email 電子郵件,group_id 參賽組別,coach 教練,head_coach 領隊,team_captain 隊長,
@@ -172,6 +178,7 @@ def editteam_member(team_id=''):
     team_data = engine.execute(sql_team).fetchone()
     team_column_names = team_data.keys()
     return render_template('output6.html', outdata=data, outheaders=column_names,outteam=team_data,outteamheader=team_column_names)
+
 
 @app.route('/editmember/', methods=['GET', 'POST'])
 @app.route('/editmember/<team_id>', methods=['GET', 'POST'])
@@ -218,9 +225,9 @@ def add_person():
                 #若HTML表單有選擇檔案, 但檔案大小超過規定, 則禁止新增, 並拋送Exception訊息
                 if file and file_size > app.config['MAX_FILE_SIZE']:
                     raise Exception(f"檔案太大,無法上傳,不能>{app.config['MAX_FILE_SIZE']}Bytes")
-            
-            sql1 = f'''insert into registration(pid, school_name, team_id, student_name, email, phone, jersey_number) 
-                values ('{pid}', '{school}','{team_id}','{name}','{email}','{phone}','{jersey_number}')'''
+            team_num = get_teamid_fm_pid(current_user.id)
+            sql1 = f'''insert into registration(pid, school_name, team_id, student_name, email, phone, team_num, jersey_number) 
+                values ('{pid}', '{school}','{team_id}','{name}','{email}','{phone}',{team_num},'{jersey_number}')'''
             conn.execute(sql1)
             
             for iboxname, file in request.files.items():
@@ -242,7 +249,7 @@ def add_person():
         finally:
             conn.close()
         #print(school+name+email)
-    return redirect(url_for("editmember"))
+    return redirect(url_for("editteam_member"))
 
 #修改人員資料
 @app.route('/edit_person/<pid>', methods=['GET','POST'])
@@ -271,7 +278,7 @@ def edit_person(pid):
             if file and file_size > app.config['MAX_FILE_SIZE']:
                 raise Exception(f"檔案太大,無法上傳,不能>{app.config['MAX_FILE_SIZE']}Bytes")
             sql1 = f'''UPDATE registration SET school_name='{school}',team_id='{team_id}',student_name='{name}',
-                email='{email}',phone='{phone}',jersey_number='{jersey_number}',update_time='now()' 
+                email='{email}',phone='{phone}',jersey_number='{jersey_number}' update_time='now()' 
                 WHERE pid='{pid}' '''
             conn.execute(sql1)
 
@@ -308,7 +315,7 @@ def edit_person(pid):
         finally:
             conn.close()
     
-    return redirect(url_for("editmember"))
+    return redirect(url_for("editteam_member"))
 
 #刪除人員資料
 @app.route('/del_person/<pid>', methods=['GET','POST'])
@@ -327,7 +334,7 @@ def del_person(pid):
         finally:
             conn.close()
 
-    return redirect(url_for("editmember"))
+    return redirect(url_for("editteam_member"))
 
 # create showfile function 
 @app.route('/showfile/<ftype>/<pid>', methods=['GET','POST'])

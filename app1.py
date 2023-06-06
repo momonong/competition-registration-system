@@ -278,7 +278,7 @@ def edit_person(pid):
             if file and file_size > app.config['MAX_FILE_SIZE']:
                 raise Exception(f"檔案太大,無法上傳,不能>{app.config['MAX_FILE_SIZE']}Bytes")
             sql1 = f'''UPDATE registration SET school_name='{school}',team_id='{team_id}',student_name='{name}',
-                email='{email}',phone='{phone}',jersey_number='{jersey_number}' update_time='now()' 
+                email='{email}',phone='{phone}',jersey_number='{jersey_number}', update_time='now()' 
                 WHERE pid='{pid}' '''
             conn.execute(sql1)
 

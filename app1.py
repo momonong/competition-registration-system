@@ -198,6 +198,37 @@ def editmember(team_id=''):
     column_names = data.keys()
     return render_template('output5.html', outdata=data, outheaders=column_names)
 
+#修改隊伍資料
+@app.route('/edit_team/<int:tid>/<int:pid>', methods=['GET','POST'])
+def edit_team(tid,pid):
+    if request.method == "POST":
+        ct_name = request.values['in_ctname'].strip()
+        team_name = request.values['in_tname'].strip()
+        group_name = request.values['in_group'].strip()
+        coach_name = request.values['in_coach'].strip()
+        headcoach_name = request.values['in_hcoach'].strip()
+        team_captain_name = request.values['in_captain'].strip()
+
+        conn = engine.connect()
+        trans = conn.begin()
+        try:
+            sql1 = f'''UPDATE "user" SET name='{ct_name}' WHERE id={pid} '''
+            conn.execute(sql1)
+            sql2 = f'''UPDATE team SET team_name='{team_name}', group_id='{group_name}', coach='{coach_name}',
+                head_coach='{headcoach_name}', team_captain='{team_captain_name}', update_time='now()' 
+                WHERE team_id={tid} '''
+            conn.execute(sql2)
+            trans.commit()
+            flash("修改隊伍資料成功","primary")
+        except Exception as e:
+            trans.rollback()
+            flash(f"修改隊伍資料失敗,{str(e)}","danger")
+        finally:
+            conn.close()
+        
+    return redirect(url_for("editteam_member"))
+
+
 # 新增人員
 @app.route('/add_person', methods=['GET','POST'])
 def add_person():

@@ -364,7 +364,7 @@
                         <h4 class="modal-title" id="ModalInsertLabel">新增人員</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     </div>
-                    <form action="{{url_for('add_person')}}" method="post" enctype="multipart/form-data">
+                    <form action="{{url_for('add_person',tid=outteam['team_id'])}}" method="post" enctype="multipart/form-data">
                         <div class="modal-body">
                             <div class="form-group ">
                                 <label for="in_pid" class="required-label">身分證字號</label>

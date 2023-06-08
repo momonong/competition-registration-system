@@ -18,12 +18,76 @@
         <div class="card bg-light text-dark">
             <div class="card-header">
                 <h3 class="text-center">{{outgame_id}}</h3>
+                <div align="right">
+                    <button type="button" data-bs-toggle="modal" class="btn btn-primary btn-sm"
+                            data-bs-target="#create_team">
+                            新增隊伍
+                    </button>
+                </div>
             </div>
             <div class="card-body" style="text-align: left;">
                 {{outdata|safe}}
             </div>
         </div>
     </div>
-
+    <!-- Modal for creating team data-->
+    <div class="modal fade" id="create_team" tabindex="-1" role="dialog" aria-labelledby="basicModal"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="ModalUpdateTeamLabel">新增隊伍資料</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+            </div>
+            <form action="{{url_for('add_team',gid=outgame_id,ct_pid=current_user.id)}}" method="post"
+                enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="form-group ">
+                        <label for="in_tname" class="required-label">報名單位</label>
+                        <input type="text" class="form-control" name="in_tname"
+                            id="in_tname" placeholder="報名單位" value="" required />
+                    </div>
+                    <div class="form-group ">
+                        <label for="in_ctname" class="required-label">聯絡人</label>
+                        <input type="text" class="form-control" name="in_ctname"
+                            id="in_ctname" placeholder="聯絡人" value="{{current_user.name}}" required disabled/>
+                    </div>
+                    <div class="form-group ">
+                        <label for="in_email" class="required-label">電子郵件</label>
+                        <input type="email" class="form-control" name="in_email"
+                            id="in_email" placeholder="電子郵件" value="{{current_user.email}}" required disabled/>
+                    </div>
+                    <div class="form-group ">
+                        <label for="in_group" class="required-label">參賽組別</label>
+                        <select id="in_group"  name="in_group" class="form-control"> 
+                            <option value="挑戰組(不限齡)"> 挑戰組(不限齡)</option> 
+                            <option value="菁英組(43歲以上)">菁英組(43歲以上)</option>    
+                        </select>
+                    </div>
+                    <div class="form-group ">
+                        <label for="in_coach">教練</label>
+                        <input type="text" class="form-control" name="in_coach"
+                            id="in_coach" placeholder="教練" value=""/>
+                    </div>
+                    <div class="form-group ">
+                        <label for="in_hcoach">領隊</label>
+                        <input type="text" class="form-control" name="in_hcoach"
+                            id="in_hcoach" placeholder="領隊" value=""/>
+                    </div>
+                    <div class="form-group ">
+                        <label for="in_captain" class="required-label">隊長</label>
+                        <input type="text" class="form-control" name="in_captain"
+                            id="in_captain" placeholder="隊長" value="" required/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary">送出</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+    <!-- End of Modal for creating team data-->
 </body>
 {% endblock %}

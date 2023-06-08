@@ -109,7 +109,7 @@ def mylogin():
         if user and user.password == password:
             login_user(user)
             flash('登入成功！', 'success')
-            return redirect(url_for('home'))
+            return redirect(url_for('get_teams', game_id='2023興傳盃公益籃球邀請賽') )
         else:
             flash('email 或 password 錯誤！請重試！', 'danger')
 
@@ -139,32 +139,38 @@ def get_teams(game_id):
         WHERE game_id='{game_id}' {condition} '''
     df = pd.DataFrame(engine.execute(sql))
     df.index += 1 
-    # 加'報名單位' hyperlink 至 editteam_member 頁面
-    df['報名單位'] = df.apply(lambda x: f"<a href={url_for('editteam_member',team_id=(x.team_id))}>{x.報名單位}</a>", axis=1)
-    df = df.drop('team_id', axis=1)
-    # 將dataframe 的 是否合格 column 內容為false 置換成“否”, true 置換成“是”,
-    df['是否合格'] = df['是否合格'].apply(lambda x: '是' if x else '否')
+    if df.shape[0] >= 1:
+        # 加'報名單位' hyperlink 至 editteam_member 頁面
+        df['報名單位'] = df.apply(lambda x: f"<a href={url_for('editteam_member',team_id=(x.team_id))}>{x.報名單位}</a>", axis=1)
+        df = df.drop('team_id', axis=1)
+        # 將dataframe 的 是否合格 column 內容為false 置換成“否”, true 置換成“是”,
+        df['是否合格'] = df['是否合格'].apply(lambda x: '是' if x else '否')
+    else:
+        new_data = { '報名單位': '尚無您的報名隊伍'}
+        df = df.append(new_data, ignore_index=True)
     # 將html table head 文字靠左對齊
     data_html = df.to_html(classes=['table table-border table-striped'], escape=False).replace('<th', '<th style="text-align: left;"')
         
     return render_template('show_teams.html', outgame_id=game_id, outdata=data_html)
 
 # member data database CRUD
-def get_teamid_fm_pid(pid):
-    sql = f'''SELECT team_id FROM team WHERE {current_user.id}=team.contact_pid'''
+# 從registration table(球員資料表) 取得球員的team num(id)
+def get_teamid_fm_pid(person_id):
+    sql = f'''SELECT team_num,pid FROM registration WHERE pid ='{person_id}' '''
     data = engine.execute(sql).fetchone()
-    return data['team_id']
+    return data['team_num']
 
-@app.route('/editteam_member/', methods=['GET', 'POST'])
+
+
 @app.route('/editteam_member/<int:team_id>', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'gamemanager', 'user')
-def editteam_member(team_id=''):
-    if current_user.has_role('admin') or current_user.has_role('gamemanager'):
+def editteam_member(team_id):
+    '''if current_user.has_role('admin') or current_user.has_role('gamemanager'):
         condition = ''
-    else:
-        team_id = get_teamid_fm_pid(current_user.id) 
-        condition =  f"WHERE team_num={team_id}"
+    else:'''
+    #team_id = get_teamid_fm_pid(current_user.id) 
+    condition =  f"WHERE team_num={team_id}"
     sql = f'''SELECT pid,school_name,team_id,student_name,email,phone,jersey_number,
         CASE WHEN pid_data IS NOT NULL THEN '_Y' ELSE '' end as 身,
         CASE WHEN st_data IS NOT NULL THEN '_S' ELSE '' end as 學, 
@@ -198,6 +204,34 @@ def editmember(team_id=''):
     column_names = data.keys()
     return render_template('output5.html', outdata=data, outheaders=column_names)
 
+#新增隊伍資料
+@app.route('/add_team/<gid>/<int:ct_pid>', methods=['GET','POST'])
+def add_team(gid,ct_pid):
+    if request.method == "POST":
+        team_name = request.values['in_tname'].strip()
+        group_name = request.values['in_group'].strip()
+        coach_name = request.values['in_coach'].strip()
+        headcoach_name = request.values['in_hcoach'].strip()
+        team_captain_name = request.values['in_captain'].strip()
+
+        conn = engine.connect()
+        trans = conn.begin()
+        try:
+            sql1 = f''' INSERT INTO team(team_name,game_id,group_id,contact_pid,coach,head_coach,team_captain,status) 
+                VALUES('{team_name}','{gid}','{group_name}',{ct_pid},'{coach_name}','{headcoach_name}','{team_captain_name}','尚未審核')  '''
+            conn.execute(sql1)
+            sql2 = f''' SELECT MAX(team_id) tid FROM team '''
+            team_data = conn.execute(sql2).fetchone()
+            trans.commit()
+            flash("新增隊伍資料成功","primary")
+        except Exception as e:
+            trans.rollback()
+            flash(f"新增隊伍資料失敗,{str(e)}","danger")
+        finally:
+            conn.close()
+
+    return redirect(url_for('editteam_member', team_id=team_data['tid']))
+
 #修改隊伍資料
 @app.route('/edit_team/<int:tid>/<int:pid>', methods=['GET','POST'])
 def edit_team(tid,pid):
@@ -226,12 +260,12 @@ def edit_team(tid,pid):
         finally:
             conn.close()
         
-    return redirect(url_for("editteam_member"))
+    return redirect(url_for('editteam_member', team_id=tid))
 
 
 # 新增人員
-@app.route('/add_person', methods=['GET','POST'])
-def add_person():
+@app.route('/add_person/<int:tid>', methods=['GET','POST'])
+def add_person(tid):
     if request.method == "POST":
         pid = request.values['in_pid'].upper().strip()  #去除頭尾空白字元
         school = request.values['in_school'].strip()
@@ -256,9 +290,9 @@ def add_person():
                 #若HTML表單有選擇檔案, 但檔案大小超過規定, 則禁止新增, 並拋送Exception訊息
                 if file and file_size > app.config['MAX_FILE_SIZE']:
                     raise Exception(f"檔案太大,無法上傳,不能>{app.config['MAX_FILE_SIZE']}Bytes")
-            team_num = get_teamid_fm_pid(current_user.id)
+            #team_num = get_teamid_fm_pid(current_user.id)
             sql1 = f'''insert into registration(pid, school_name, team_id, student_name, email, phone, team_num, jersey_number) 
-                values ('{pid}', '{school}','{team_id}','{name}','{email}','{phone}',{team_num},'{jersey_number}')'''
+                values ('{pid}', '{school}','{team_id}','{name}','{email}','{phone}',{tid},'{jersey_number}')'''
             conn.execute(sql1)
             
             for iboxname, file in request.files.items():
@@ -280,7 +314,7 @@ def add_person():
         finally:
             conn.close()
         #print(school+name+email)
-    return redirect(url_for("editteam_member"))
+    return redirect(url_for('editteam_member', team_id=tid))
 
 #修改人員資料
 @app.route('/edit_person/<pid>', methods=['GET','POST'])
@@ -345,8 +379,8 @@ def edit_person(pid):
             flash(f"修改人員失敗,{str(e)}","danger")
         finally:
             conn.close()
-    
-    return redirect(url_for("editteam_member"))
+        team_num = get_teamid_fm_pid(pid)
+    return redirect(url_for("editteam_member", team_id=team_num))
 
 #刪除人員資料
 @app.route('/del_person/<pid>', methods=['GET','POST'])
@@ -355,6 +389,7 @@ def del_person(pid):
         conn = engine.connect()
         trans = conn.begin()
         try:
+            team_num = get_teamid_fm_pid(pid)
             sql = f'''DELETE FROM registration WHERE pid='{pid}' '''
             conn.execute(sql)
             trans.commit()
@@ -364,8 +399,8 @@ def del_person(pid):
             flash(f"刪除人員失敗,{str(e)}","danger")
         finally:
             conn.close()
-
-    return redirect(url_for("editteam_member"))
+    
+    return redirect(url_for("editteam_member", team_id=team_num))
 
 # create showfile function 
 @app.route('/showfile/<ftype>/<pid>', methods=['GET','POST'])

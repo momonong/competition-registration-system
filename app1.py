@@ -220,14 +220,16 @@ def add_team(gid,ct_pid):
             sql1 = f''' INSERT INTO team(team_name,game_id,group_id,contact_pid,coach,head_coach,team_captain,status) 
                 VALUES('{team_name}','{gid}','{group_name}',{ct_pid},'{coach_name}','{headcoach_name}','{team_captain_name}','尚未審核')  '''
             conn.execute(sql1)
-            sql2 = f''' SELECT MAX(team_id) tid FROM team '''
-            team_data = conn.execute(sql2).fetchone()
+            #sql2 = f''' SELECT MAX(team_id) tid FROM team '''
+            #team_data = conn.execute(sql2).fetchone()
             trans.commit()
             flash("新增隊伍資料成功","primary")
         except Exception as e:
             trans.rollback()
             flash(f"新增隊伍資料失敗,{str(e)}","danger")
         finally:
+            sql2 = f''' SELECT MAX(team_id) tid FROM team '''
+            team_data = conn.execute(sql2).fetchone()
             conn.close()
 
     return redirect(url_for('editteam_member', team_id=team_data['tid']))

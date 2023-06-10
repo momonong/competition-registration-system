@@ -136,16 +136,16 @@ def get_teams(game_id):
     else:    
         condition = f" AND contact_pid='{current_user.id}'"
     sql = f'''SELECT team_id, team_name 報名單位, group_id 參賽組別, status 狀態, qualified 是否合格 FROM team 
-        WHERE game_id='{game_id}' {condition} '''
+        WHERE game_id='{game_id}' {condition} order by 報名單位, 參賽組別'''
     df = pd.DataFrame(engine.execute(sql))
     df.index += 1 
-    if df.shape[0] >= 1:
+    if df.shape[0] >= 1: #該權限內可看到的隊伍, 若至少有一隊已報名, 則顯示隊伍清單
         # 加'報名單位' hyperlink 至 editteam_member 頁面
         df['報名單位'] = df.apply(lambda x: f"<a href={url_for('editteam_member',team_id=(x.team_id))}>{x.報名單位}</a>", axis=1)
         df = df.drop('team_id', axis=1)
         # 將dataframe 的 是否合格 column 內容為false 置換成“否”, true 置換成“是”,
         df['是否合格'] = df['是否合格'].apply(lambda x: '是' if x else '否')
-    else:
+    else: #該權限內沒有看到任一個個報名隊伍, 則顯示'尚無您的報名隊伍'
         new_data = { '報名單位': '尚無您的報名隊伍'}
         df = df.append(new_data, ignore_index=True)
     # 將html table head 文字靠左對齊
@@ -175,7 +175,7 @@ def editteam_member(team_id):
         FROM registration {condition} ORDER BY reg_pid'''
     data = engine.execute(sql)
     column_names = data.keys()
-    sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,name 聯絡人,email 電子郵件,group_id 參賽組別,coach 教練,head_coach 領隊,team_captain 隊長,
+    sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,email 電子郵件,coach 教練,head_coach 領隊,team_captain 隊長,
             status 狀態,CASE WHEN qualified IS true THEN '是' ELSE '否' END as 是否合格
             FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
     team_data = engine.execute(sql_team).fetchone()

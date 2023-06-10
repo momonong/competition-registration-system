@@ -60,22 +60,33 @@
                                     id="in_tname" placeholder="報名單位" value="{{outteam['報名單位']}}" required />
                             </div>
                             <div class="form-group ">
-                                <label for="in_ctname" class="required-label">聯絡人</label>
-                                <input type="text" class="form-control" name="in_ctname"
-                                    id="in_ctname" placeholder="聯絡人" value="{{outteam['聯絡人']}}" required />
-                            </div>
-                            <div class="form-group ">
-                                <label for="in_email" class="required-label">電子郵件</label>
-                                <input type="email" class="form-control" name="in_email"
-                                    id="in_email" placeholder="電子郵件" value="{{outteam['電子郵件']}}" required disabled/>
-                            </div>
-                            <div class="form-group ">
                                 <label for="in_group" class="required-label">參賽組別</label>
                                 <select id="in_group"  name="in_group" class="form-control"> 
                                     <option value="挑戰組(不限齡)" {% if outteam['參賽組別'] == '挑戰組(不限齡)' %}selected{% endif %}>挑戰組(不限齡)</option> 
                                     <option value="菁英組(43歲以上)" {% if outteam['參賽組別'] == '菁英組(43歲以上)' %}selected{% endif %}>菁英組(43歲以上)</option>    
                                 </select>
                             </div>
+                            <div class="form-group ">
+                                <label for="in_ctname" class="required-label">聯絡人</label>
+                                <input type="text" class="form-control" name="in_ctname"
+                                    id="in_ctname" placeholder="聯絡人" value="{{outteam['聯絡人']}}" required />
+                            </div>
+                            <div class="form-group ">
+                                <label for="in_phone">電話</label>
+                                <input type="number" class="form-control" name="in_phone"
+                                    id="in_phone" placeholder="電話(只限數字)" value="{{outteam['電話']}}" />
+                            </div>
+                            <div class="form-group ">
+                                <label for="in_mobile">備用手機</label>
+                                <input type="number" class="form-control" name="in_mobile"
+                                    id="in_mobile" placeholder="備用手機(只限數字)" value="{{outteam['備用手機']}}" />
+                            </div>
+                            <div class="form-group ">
+                                <label for="in_email" class="required-label">電子郵件</label>
+                                <input type="email" class="form-control" name="in_email"
+                                    id="in_email" placeholder="電子郵件" value="{{outteam['電子郵件']}}" required disabled/>
+                            </div>
+                            
                             <div class="form-group ">
                                 <label for="in_coach">教練</label>
                                 <input type="text" class="form-control" name="in_coach"

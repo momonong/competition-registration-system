@@ -52,6 +52,8 @@ class User(db.Model, UserMixin):
     active = db.Column(db.Boolean())
     name = db.Column(db.String)
     team_id = db.Column(db.String)
+    phone = db.Column(db.String)
+    mobile = db.Column(db.String)
     # backreferences the user_id from roles_users table
     roles = db.relationship('Role', secondary=roles_users, backref='roled')
  
@@ -175,7 +177,7 @@ def editteam_member(team_id):
         FROM registration {condition} ORDER BY reg_pid'''
     data = engine.execute(sql)
     column_names = data.keys()
-    sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,email 電子郵件,coach 教練,head_coach 領隊,team_captain 隊長,
+    sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile 備用手機,email 電子郵件,coach 教練,head_coach 領隊,team_captain 隊長,
             status 狀態,CASE WHEN qualified IS true THEN '是' ELSE '否' END as 是否合格
             FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
     team_data = engine.execute(sql_team).fetchone()
@@ -236,6 +238,8 @@ def add_team(gid,ct_pid):
 def edit_team(tid,pid):
     if request.method == "POST":
         ct_name = request.values['in_ctname'].strip()
+        phone = request.values['in_phone'].strip()
+        mobile = request.values['in_mobile'].strip()
         team_name = request.values['in_tname'].strip()
         group_name = request.values['in_group'].strip()
         coach_name = request.values['in_coach'].strip()
@@ -245,7 +249,7 @@ def edit_team(tid,pid):
         conn = engine.connect()
         trans = conn.begin()
         try:
-            sql1 = f'''UPDATE "user" SET name='{ct_name}' WHERE id={pid} '''
+            sql1 = f'''UPDATE "user" SET name='{ct_name}',phone='{phone}',mobile='{mobile}' WHERE id={pid} '''
             conn.execute(sql1)
             sql2 = f'''UPDATE team SET team_name='{team_name}', group_id='{group_name}', coach='{coach_name}',
                 head_coach='{headcoach_name}', team_captain='{team_captain_name}', update_time='now()' 

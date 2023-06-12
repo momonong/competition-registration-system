@@ -41,10 +41,6 @@ CREATE TABLE IF NOT EXISTS public."user"
     team_id character varying COLLATE pg_catalog."default",
     phone character varying COLLATE pg_catalog."default",
     mobile character varying COLLATE pg_catalog."default",
-    sign_filename character varying COLLATE pg_catalog."default",
-    sign_data bytea,
-    logo_filename character varying COLLATE pg_catalog."default",
-    logo_data bytea,
     CONSTRAINT user_pkey PRIMARY KEY (id),
     CONSTRAINT "UNI_email" UNIQUE (email)
 )
@@ -106,6 +102,10 @@ CREATE TABLE IF NOT EXISTS public.team
     status character varying COLLATE pg_catalog."default" NOT NULL,
     qualified boolean NOT NULL DEFAULT false,
     update_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    sign_filename character varying COLLATE pg_catalog."default",
+    sign_data bytea,
+    logo_filename character varying COLLATE pg_catalog."default",
+    logo_data bytea,
     CONSTRAINT "Team_pkey" PRIMARY KEY (team_id)
 )
 

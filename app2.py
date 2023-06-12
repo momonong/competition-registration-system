@@ -16,7 +16,7 @@ app.config['SECRET_KEY'] = 'fi13dE9fafkd9a0afklm81WEEd'
 app.config['SECURITY_PASSWORD_SALT'] = "uY939qAAZiqi939dfGQR2sDG9333SIkjWu"
 app.config['SECURITY_REGISTERABLE'] = True
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
-app.config['ALLOWED_EXTENSIONS'] = {'PDF', 'JPG', 'JPEG', 'PNG', 'HEIC'}
+app.config['ALLOWED_EXTENSIONS'] = {'PDF', 'JPG', 'JPEG', 'PNG', 'HEIC', 'AI'}
 app.config['MAX_FILE_SIZE'] =  10 * 1024 * 1024  # 10MB 的位元組
 app.config['GAME'] = {'賽事名稱':'2023興傳盃公益籃球邀請賽', '主辦':'國立中興大學EMBA校友會',
                       '協辦':'國立中興大學EMBA學生會、國立中興大學EMBA辦公室',
@@ -147,6 +147,7 @@ def get_teams(game_id):
         df = df.drop('team_id', axis=1)
         # 將dataframe 的 是否合格 column 內容為false 置換成“否”, true 置換成“是”,
         df['是否合格'] = df['是否合格'].apply(lambda x: '是' if x else '否')
+        #df['是否合格'] = df['是否合格'].apply(lambda x: '<select><option value="true" selected>是</option><option value="false">否</option></select>' if x else '<select><option value="true">是</option><option value="false" selected>否</option></select>')
     else: #該權限內沒有看到任一個個報名隊伍, 則顯示'尚無您的報名隊伍'
         new_data = { '報名單位': '尚無您的報名隊伍'}
         df = df.append(new_data, ignore_index=True)
@@ -177,7 +178,10 @@ def editteam_member(team_id):
         FROM registration {condition} ORDER BY reg_pid'''
     data = engine.execute(sql)
     column_names = data.keys()
-    sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile 備用手機,email 電子郵件,coach 教練,head_coach 領隊,team_captain 隊長,
+    sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile 備用手機,email 電子郵件,
+            coach 教練,head_coach 領隊,team_captain 隊長,
+            CASE WHEN sign_data IS NOT NULL THEN 'Y' ELSE '' END as 系辦蓋章,
+            CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "學校Logo",
             status 狀態,CASE WHEN qualified IS true THEN '是' ELSE '否' END as 是否合格
             FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
     team_data = engine.execute(sql_team).fetchone()
@@ -219,8 +223,31 @@ def add_team(gid,ct_pid):
             sql1 = f''' INSERT INTO team(team_name,game_id,group_id,contact_pid,coach,head_coach,team_captain,status) 
                 VALUES('{team_name}','{gid}','{group_name}',{ct_pid},'{coach_name}','{headcoach_name}','{team_captain_name}','尚未審核')  '''
             conn.execute(sql1)
-            #sql2 = f''' SELECT MAX(team_id) tid FROM team '''
-            #team_data = conn.execute(sql2).fetchone()
+            sql2 = f''' SELECT MAX(team_id) FROM team '''
+            tid = conn.execute(sql2).fetchone()[0] #取得新增的自動編號team_id
+            #找出所有 input box 為file type, iboxname存放所有input box name, file 存放檔案資料 
+            for iboxname,file in request.files.items():
+                if file.filename:
+                    file_extension = file.filename.rsplit('.', 1)[1].upper()
+                    file_size = len(file.read())
+                    file.seek(0)  # 將檔案指標重新移回檔案開頭
+            #若HTML表單有選擇檔案, 但副檔名不在許可格式清單中, 則禁止更新, 並拋送Exception訊息
+            if file and not(file_extension in app.config['ALLOWED_EXTENSIONS']):
+                raise Exception(f"{file_extension}檔案格式不能上傳")
+            #若HTML表單有選擇檔案, 但檔案大小超過規定, 則禁止新增, 並拋送Exception訊息
+            if file and file_size > app.config['MAX_FILE_SIZE']:
+                raise Exception(f"檔案太大,無法上傳,不能>{app.config['MAX_FILE_SIZE']}Bytes")
+            
+            for iboxname, file in request.files.items():
+                # 若HTML表單有選擇檔案, 根據input box name而決定更新資料庫對應檔案欄位, 則更新檔案
+                if file.filename:
+                    if iboxname.upper() == 'IN_FILE_SIGNDOC':
+                        sql2 ="UPDATE team SET sign_filename=%s, sign_data=%s WHERE team_id=%s"
+                        conn.execute(sql2, file.filename, file.read(), tid)
+                    elif iboxname.upper() == 'IN_FILE_LOGO':
+                        sql2_1 ="UPDATE team SET logo_filename=%s, logo_data=%s WHERE team_id=%s"
+                        conn.execute(sql2_1, file.filename, file.read(), tid)
+
             trans.commit()
             flash("新增隊伍資料成功","primary")
         except Exception as e:
@@ -255,6 +282,39 @@ def edit_team(tid,pid):
                 head_coach='{headcoach_name}', team_captain='{team_captain_name}', update_time='now()' 
                 WHERE team_id={tid} '''
             conn.execute(sql2)
+
+            #找出所有 input box 為file type, iboxname存放所有input box name, file 存放檔案資料 
+            for iboxname,file in request.files.items():
+                if file.filename:
+                    file_extension = file.filename.rsplit('.', 1)[1].upper()
+                    file_size = len(file.read())
+                    file.seek(0)  # 將檔案指標重新移回檔案開頭
+            #若HTML表單有選擇檔案, 但副檔名不在許可格式清單中, 則禁止更新, 並拋送Exception訊息
+            if file and not(file_extension in app.config['ALLOWED_EXTENSIONS']):
+                raise Exception(f"{file_extension}檔案格式不能上傳")
+            #若HTML表單有選擇檔案, 但檔案大小超過規定, 則禁止新增, 並拋送Exception訊息
+            if file and file_size > app.config['MAX_FILE_SIZE']:
+                raise Exception(f"檔案太大,無法上傳,不能>{app.config['MAX_FILE_SIZE']}Bytes")
+            
+            for iboxname, file in request.files.items():
+                # 若HTML表單有選擇檔案, 根據input box name而決定更新資料庫對應檔案欄位, 則更新檔案
+                if file.filename:
+                    if iboxname.upper() == 'IN_FILE_SIGNDOC':
+                        sql2 ="UPDATE team SET sign_filename=%s, sign_data=%s WHERE team_id=%s"
+                        conn.execute(sql2, file.filename, file.read(), tid)
+                    elif iboxname.upper() == 'IN_FILE_LOGO':
+                        sql2_1 ="UPDATE team SET logo_filename=%s, logo_data=%s WHERE team_id=%s"
+                        conn.execute(sql2_1, file.filename, file.read(), tid)
+                        
+                # 若HTML表單未選擇檔案, 並且勾選移除已上傳檔案, 則清除資料庫檔案
+                elif not(file.filename):
+                    if iboxname.upper()=='IN_FILE_SIGNDOC' and request.form.get('in_rmsigndocexistfile')=='SIGNDOC':
+                        sql3 ="UPDATE team SET sign_filename=null, sign_data=null WHERE team_id=%s"
+                        conn.execute(sql3, tid)
+                    elif iboxname.upper()=='IN_FILE_LOGO' and request.form.get('in_rmlogoexistfile')=='LOGO':
+                        sql3_1 ="UPDATE team SET logo_filename=null, logo_data=null WHERE team_id=%s"
+                        conn.execute(sql3_1, tid)
+
             trans.commit()
             flash("修改隊伍資料成功","primary")
         except Exception as e:
@@ -416,41 +476,58 @@ def del_person(reg_pid):
 
 # create showfile function 
 @app.route('/showfile/<ftype>/<reg_pid>', methods=['GET','POST'])
+@login_required
 def showfile(ftype,reg_pid):
-    try:
-        match ftype:
-            case 'PID':
-                fname = 'pid_filename'
-                fdata = 'pid_data'
-            case 'STUID':
-                fname = 'st_filename'
-                fdata = 'st_data'
-            case 'ENROLL':
-                fname = 'er_filename'
-                fdata = 'er_data'
-        sql = f"select {fname},{fdata} from registration where reg_pid={reg_pid}"
-        file_data = engine.execute(sql).fetchone()
-        file_stream = BytesIO(file_data[fdata])
-        file_name = file_data[fname]
-        file_extension = file_name.split(".")[-1].upper()
-        headers = {}
-        match file_extension:
-            case 'JPG' | 'JPEG':
-                filetype = 'image/jpeg'
-            case 'PNG':
-                filetype = 'image/png'
-            case 'PDF':
-                filetype = 'application/pdf'
-            case 'HEIC':
-                filetype = 'image/heic'
-            case _:
-                filetype = 'na'
-        #flash("Show檔案成功","primary")
-        headers = {	'Content-Type': filetype,
-                	'Content-Disposition': f'''inline; filename="{quote(file_data[fname])}"'''}
+    if request.method == "GET":
+        try:
+            match ftype:
+                case 'PID':
+                    fname = 'pid_filename'
+                    fdata = 'pid_data'
+                case 'STUID':
+                    fname = 'st_filename'
+                    fdata = 'st_data'
+                    tablename = 'registration'
+                    idname = 'reg_pid'
+                case 'ENROLL':
+                    fname = 'er_filename'
+                    fdata = 'er_data'
+                case 'SIGNDOC':
+                    fname = 'sign_filename'
+                    fdata = 'sign_data'
+                    tablename = 'team'
+                    idname = 'team_id'
+                case 'LOGO':
+                    fname = 'logo_filename'
+                    fdata = 'logo_data'
+                    tablename = 'team'
+                    idname = 'team_id'
+            sql = f"select {fname},{fdata} from {tablename} where {idname}={reg_pid}"
+            file_data = engine.execute(sql).fetchone()
+            file_stream = BytesIO(file_data[fdata])
+            file_name = file_data[fname]
+            file_extension = file_name.split(".")[-1].upper()
+            headers = {}
+            #為了傳檔案類型給Browser, 才能正確顯示檔案
+            match file_extension:
+                case 'JPG' | 'JPEG':
+                    filetype = 'image/jpeg'
+                case 'PNG':
+                    filetype = 'image/png'
+                case 'PDF':
+                    filetype = 'application/pdf'
+                case 'HEIC':
+                    filetype = 'image/heic'
+                case 'AI':
+                    filetype = "application/illustrator"
+                case _:
+                    filetype = 'na'
+            #flash("Show檔案成功","primary")
+            headers = {	'Content-Type': filetype,
+                        'Content-Disposition': f'''inline; filename="{quote(file_data[fname])}"'''}
     
-    except Exception as e:
-        flash(f"Show檔案失敗,{str(e)}","danger")
+        except Exception as e:
+            flash(f"Show檔案失敗,{str(e)}","danger")
     # 以下 send_file->download_name 需搭配python v3.11
     #return send_file(file_stream, mimetype=filetype, download_name=(quote(file_data['pid_filename'])), as_attachment=False)
     return Response(file_stream, headers=headers)

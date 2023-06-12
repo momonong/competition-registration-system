@@ -27,7 +27,19 @@
                     {% if head != 'team_id' and head != 'id'%}
                     <tr>
                         <td align="right">{{head}}:</td>
-                        <td align="left">{{outteam[head]}}</td>
+                        {% if head == '系辦蓋章' and outteam['系辦蓋章'] =='Y' %}
+                            <td align="left">
+                            <a href="{{ url_for('showfile', ftype='SIGNDOC', reg_pid=outteam['team_id']) }}" data-toggle="tooltip"
+                                title="查看報名系辦蓋章檔案" class="text-decoration-none" target="_blank">📎</a>
+                            </td>
+                        {% elif head == '學校Logo' and outteam['學校Logo'] =='Y' %}
+                        <td align="left">
+                            <a href="{{ url_for('showfile', ftype='LOGO', reg_pid=outteam['team_id']) }}" data-toggle="tooltip"
+                                title="查看學校Logo檔案" class="text-decoration-none" target="_blank">📎</a>
+                            </td>
+                        {% else %}
+                            <td align="left">{{outteam[head]}}</td>
+                        {% endif %}
                     </tr>
                     {% endif %}
 
@@ -101,6 +113,49 @@
                                 <label for="in_captain" class="required-label">隊長</label>
                                 <input type="text" class="form-control" name="in_captain"
                                     id="in_captain" placeholder="隊長" value="{{outteam['隊長']}}" required/>
+                            </div>
+
+                            <div class="form-group ">
+                                <label for="in_file">報名名單系辦蓋章檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub>
+                                    </font></label>
+                                {% if outteam['系辦蓋章'] =='Y' %}
+                                <div class="form-control">
+                                    <a href="{{ url_for('showfile', ftype='SIGNDOC', reg_pid=outteam['team_id']) }}"
+                                        target="_blank">檢視已上傳檔案</a>
+                                    <input type="checkbox" name="in_rmsigndocexistfile" id="in_rmsigndocexistfile"
+                                        value="SIGNDOC" />
+                                    <label for="in_rmsigndocexistfile">移除已上傳檔案</label>
+                                </div>
+                                {% endif %}
+                                <div class="form-control">
+                                    <input type="file"
+                                        accept="image/jpeg, image/png, image/heic, application/pdf"
+                                        name="in_file_signdoc" id="in_file_signdoc"
+                                        value="outteam['系辦蓋章']" placeholder="報名名單系辦蓋章檔案" />
+                                    <button type="button" class="btn btn-link"
+                                        onclick="document.getElementById('in_file_signdoc').value = ''">不要選擇檔案</button>
+                                </div>
+                            </div>
+                            <div class="form-group ">
+                                <label for="in_file">學校Logo檔案<font color="grey"><sub>（只限AI格式）</sub>
+                                    </font></label>
+                                {% if outteam['學校Logo'] =='Y' %}
+                                <div class="form-control">
+                                    <a href="{{ url_for('showfile', ftype='LOGO', reg_pid=outteam['team_id']) }}"
+                                        target="_blank">檢視已上傳檔案</a>
+                                    <input type="checkbox" name="in_rmlogoexistfile" id="in_rmlogoexistfile"
+                                        value="LOGO" />
+                                    <label for="in_rmlogoexistfile">移除已上傳檔案</label>
+                                </div>
+                                {% endif %}
+                                <div class="form-control">
+                                    <input type="file"
+                                        accept=".ai"
+                                        name="in_file_logo" id="in_file_logo"
+                                        value="outteam['學校Logo']" placeholder="學校Logo檔案" />
+                                    <button type="button" class="btn btn-link"
+                                        onclick="document.getElementById('in_file_logo').value = ''">不要選擇檔案</button>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">

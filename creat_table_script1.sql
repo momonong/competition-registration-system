@@ -39,6 +39,12 @@ CREATE TABLE IF NOT EXISTS public."user"
     active boolean,
     name character varying COLLATE pg_catalog."default",
     team_id character varying COLLATE pg_catalog."default",
+    phone character varying COLLATE pg_catalog."default",
+    mobile character varying COLLATE pg_catalog."default",
+    sign_filename character varying COLLATE pg_catalog."default",
+    sign_data bytea,
+    logo_filename character varying COLLATE pg_catalog."default",
+    logo_data bytea,
     CONSTRAINT user_pkey PRIMARY KEY (id),
     CONSTRAINT "UNI_email" UNIQUE (email)
 )

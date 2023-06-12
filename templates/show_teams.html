@@ -90,6 +90,30 @@
                         <input type="text" class="form-control" name="in_captain"
                             id="in_captain" placeholder="隊長" value="" required/>
                     </div>
+
+                    <div class="form-group ">
+                        <label for="in_file">報名名單系辦蓋章檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub>
+                            </font></label>
+                        <div class="form-control">
+                            <input type="file"
+                                accept="image/jpeg, image/png, image/heic, application/pdf"
+                                name="in_file_signdoc" id="in_file_signdoc"
+                                placeholder="報名名單系辦蓋章檔案" />
+                            <button type="button" class="btn btn-link"
+                                onclick="document.getElementById('in_file_signdoc').value = ''">不要選擇檔案</button>
+                        </div>
+                    </div>
+                    <div class="form-group ">
+                        <label for="in_file">學校Logo檔案<font color="grey"><sub>（只限AI格式）</sub>
+                            </font></label>
+                        <div class="form-control">
+                            <input type="file"
+                                accept=".ai"
+                                name="in_file_logo" id="in_file_logo"
+                                placeholder="學校Logo檔案" />
+                            <button type="button" class="btn btn-link"
+                                onclick="document.getElementById('in_file_logo').value = ''">不要選擇檔案</button>
+                        </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-bs-dismiss="modal">取消</button>

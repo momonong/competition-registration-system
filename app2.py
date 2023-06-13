@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask, render_template, redirect, url_for, request, flash, Response,send_file
+from flask import Flask, render_template, redirect, url_for, request, flash, Response,send_file,make_response
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,7 +11,7 @@ import pandas as pd
 from datetime import timedelta
 import os
 from openpyxl import load_workbook
-from openpyxl.utils.dataframe import dataframe_to_rows
+import zipfile
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:123456@127.0.0.1:5432/sport'
@@ -603,7 +603,36 @@ def download(team_id):
     return send_file(buffer, as_attachment=True, download_name=f"{df1['報名單位'].values[0]}_{df1['參賽組別'].values[0]}.xlsx",
     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
+# Download 報名球員大頭照, 下載檔案格式為zip
+@app.route('/download_photo/<int:team_id>', methods=['GET'])
+@login_required
+@roles_accepted('admin', 'gamemanager', 'user')
+def download_photo(team_id):
+    sql1 = f"SELECT team_name FROM team WHERE team_id={team_id} "
+    team_name = engine.execute(sql1).fetchone()[0]
 
+    sql2 = f'''SELECT st_data,student_name
+        FROM registration WHERE team_num={team_id} '''
+    rows = engine.execute(sql2)
+    
+    # Create a BytesIO object to store the zip file
+    zip_data = BytesIO()
+
+    # Create a ZipFile object to write the photo
+    with zipfile.ZipFile(zip_data, 'w') as zip_file:
+        # Iterate through the rows and add each photo to the zip file
+        for i, row in enumerate(rows):
+            if row['st_data']: # if photo data existed
+                image_data = row['st_data']  
+                file_name = f"{team_name}_{row['student_name']}.jpg"  # Set a file name for the photo
+                zip_file.writestr(file_name, image_data)
+
+    # Set the appropriate headers for the zip file response
+    response = make_response(zip_data.getvalue())
+    response.headers['Content-Disposition'] = f'''attachment; filename="{quote(team_name)}_photos.zip" '''
+    response.headers['Content-Type'] = 'application/zip'
+
+    return response
 
 
 if __name__ == '__main__':

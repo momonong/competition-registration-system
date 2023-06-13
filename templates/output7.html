@@ -189,6 +189,7 @@
                     {% endif %}    
                 {% endfor %}
                 <td align="right">
+                    <a href="{{ url_for('download_photo', team_id=outteam['team_id']) }}" class="btn btn-info btn-sm" >下載大頭照</a>
                     <a href="{{ url_for('download', team_id=outteam['team_id']) }}" class="btn btn-info btn-sm" >下載報名表</a>
                     <button type="button" data-bs-toggle="modal" class="btn btn-primary btn-sm"
                         data-bs-target="#insert_person">
@@ -281,7 +282,7 @@
                                     </div>
                                     
                                     <div class="form-group ">
-                                        <label for="in_file">大頭照檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub>
+                                        <label for="in_file">大頭照檔案<font color="grey"><sub>（只限JPEG格式）</sub>
                                             </font></label>
                                         {% if row.大頭照 =='_S' %}
                                         <div class="form-control">
@@ -294,7 +295,7 @@
                                         {% endif %}
                                         <div class="form-control">
                                             <input type="file"
-                                                accept="image/jpeg, image/png, image/heic, application/pdf"
+                                                accept="image/jpeg"
                                                 name="in_file_stuid" id="in_file_stuid{{loop.index}}"
                                                 value="{{row.reg_pid}}" placeholder="大頭照檔案" />
                                             <button type="button" class="btn btn-link"
@@ -419,10 +420,10 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="in_file">大頭照檔案<font color="grey"><sub>（只限JPEG/PNG/HEIC/PDF格式）</sub></font>
+                                <label for="in_file">大頭照檔案<font color="grey"><sub>（只限JPEG格式）</sub></font>
                                     </label>
                                 <div class="form-control">
-                                    <input type="file" accept="image/jpeg, image/png, image/heic, application/pdf"
+                                    <input type="file" accept="image/jpeg"
                                         name="in_file_stuid" id="in_file_stuid" placeholder="大頭照檔案" />
                                     <button type="button" class="btn btn-link"
                                         onclick="document.getElementById('in_file_stuid').value = ''">不要選擇檔案</button>

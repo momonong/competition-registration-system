@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask, render_template, redirect, url_for, request, flash, Response
+from flask import Flask, render_template, redirect, url_for, request, flash, Response,send_file
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,16 +8,21 @@ from sqlalchemy import create_engine
 from io import BytesIO
 from urllib.parse import quote
 import pandas as pd
-
+from datetime import timedelta
+import os
+from openpyxl import load_workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:123456@127.0.0.1:5432/sport'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=4)
 app.config['SECRET_KEY'] = 'fi13dE9fafkd9a0afklm81WEEd'
 app.config['SECURITY_PASSWORD_SALT'] = "uY939qAAZiqi939dfGQR2sDG9333SIkjWu"
 app.config['SECURITY_REGISTERABLE'] = True
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 app.config['ALLOWED_EXTENSIONS'] = {'PDF', 'JPG', 'JPEG', 'PNG', 'HEIC', 'AI'}
 app.config['MAX_FILE_SIZE'] =  10 * 1024 * 1024  # 10MB 的位元組
+app.config['EXPORT_FOLDER'] = 'EXP_FOLDER'
 app.config['GAME'] = {'賽事名稱':'2023興傳盃公益籃球邀請賽', '主辦':'國立中興大學EMBA校友會',
                       '協辦':'國立中興大學EMBA學生會、國立中興大學EMBA辦公室',
                       '執行':'國立中興大學EMBA籃球社',
@@ -209,6 +214,7 @@ def editmember(team_id=''):
 
 #新增隊伍資料
 @app.route('/add_team/<gid>/<int:ct_pid>', methods=['GET','POST'])
+@login_required
 def add_team(gid,ct_pid):
     if request.method == "POST":
         team_name = request.values['in_tname'].strip()
@@ -262,6 +268,7 @@ def add_team(gid,ct_pid):
 
 #修改隊伍資料
 @app.route('/edit_team/<int:tid>/<int:pid>', methods=['GET','POST'])
+@login_required
 def edit_team(tid,pid):
     if request.method == "POST":
         ct_name = request.values['in_ctname'].strip()
@@ -328,6 +335,7 @@ def edit_team(tid,pid):
 
 # 新增人員
 @app.route('/add_person/<int:tid>', methods=['GET','POST'])
+@login_required
 def add_person(tid):
     if request.method == "POST":
         jersey_number = request.values['in_jersey'].strip() #去除頭尾空白字元
@@ -385,6 +393,7 @@ def add_person(tid):
 
 #修改人員資料
 @app.route('/edit_person/<int:reg_pid>', methods=['GET','POST'])
+@login_required
 def edit_person(reg_pid):
     if request.method == "POST":
         team_num = request.values['in_teamid']
@@ -455,6 +464,7 @@ def edit_person(reg_pid):
 
 #刪除人員資料
 @app.route('/del_person/<int:reg_pid>', methods=['GET','POST'])
+@login_required
 def del_person(reg_pid):
     if request.method == "POST":
         #team_num = get_teamid_fm_pid(reg_pid)
@@ -532,6 +542,66 @@ def showfile(ftype,reg_pid):
     #return send_file(file_stream, mimetype=filetype, download_name=(quote(file_data['pid_filename'])), as_attachment=False)
     return Response(file_stream, headers=headers)
  
+@app.route('/download/<int:team_id>', methods=['GET'])
+@login_required
+@roles_accepted('admin', 'gamemanager', 'user')
+def download(team_id):
+
+    sql_team = f'''SELECT A.game_id,A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile 備用手機,email 電子郵件,
+            coach 教練,head_coach 領隊,team_captain 隊長
+            FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
+    df1 = pd.DataFrame(engine.execute(sql_team))
+
+    sql_reg = f'''SELECT jersey_number 背號,student_name 姓名,grade "EMBA級別",birthday 出生年月日,pid 身分證字號,
+        CASE WHEN islimited IS true THEN 'ｖ' ELSE '' end as 限制球員 
+        from REGISTRATION WHERE team_num={team_id} ORDER BY reg_pid'''
+    df2 = pd.DataFrame(engine.execute(sql_reg))
+    # 載入報名表範本
+    template_path = os.path.join(app.root_path, 'templates', '報名表.xlsx')
+    workbook = load_workbook(template_path)
+    sheet = workbook['Sheet1']
+    # 將 賽事名稱 資料存放至指定儲存格
+    sheet['C1'].value = df1['game_id'].values[0]+'報名表(資料)'
+    # 將 報名單位 資料存放至指定儲存格
+    sheet['C2'].value = df1['報名單位'].values[0]
+    # 將 聯絡人 資料存放至指定儲存格
+    sheet['F2'].value = df1['聯絡人'].values[0]
+    # 將 電話 資料存放至指定儲存格
+    sheet['C3'].value = df1['電話'].values[0]
+    # 將 備用手機 資料存放至指定儲存格
+    sheet['F3'].value = df1['備用手機'].values[0]
+    # 將 電子郵件 資料從存放至指定儲存格
+    sheet['C4'].value = df1['電子郵件'].values[0]
+    # 將 教練 資料從存放至指定儲存格
+    sheet['C5'].value = df1['教練'].values[0]
+    # 將 領隊 資料從存放至指定儲存格
+    sheet['E5'].value = df1['領隊'].values[0]
+    # 將 隊長 資料從存放至指定儲存格
+    sheet['G5'].value = df1['隊長'].values[0]
+
+    # 將 DataFrame 資料從指定儲存格B8開始輸出報名名單
+    start_row = 8
+    start_column = 2  # 欄位 B
+    for index, row in df2.iterrows():
+        for col_num, value in enumerate(row, start=start_column):
+            sheet.cell(row=start_row + index, column=col_num, value=value)
+    
+    #for row in dataframe_to_rows(df2, index=False, header=False):
+    #    sheet.append(row)
+    '''# 採用落地存檔,而將存檔直接輸出download
+    folder_path = os.path.join(app.root_path, app.config['EXPORT_FOLDER'])
+    file_path = os.path.join(folder_path, f"{df1['報名單位'].values[0]}_{df1['參賽組別'].values[0]}.xlsx")
+    workbook.save(file_path)
+    return send_file(file_path, as_attachment=True)
+    '''
+    # 採用不落地存檔,而將記憶體直接寫出至excel 
+    # 建立一個記憶體緩衝區 (in-memory buffer)
+    buffer = BytesIO()
+    # 將 Workbook 寫入緩衝區
+    workbook.save(buffer)
+    buffer.seek(0)  # 將緩衝區指標移回起始位置
+    return send_file(buffer, as_attachment=True, download_name=f"{df1['報名單位'].values[0]}_{df1['參賽組別'].values[0]}.xlsx",
+    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 
 

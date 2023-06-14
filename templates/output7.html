@@ -157,6 +157,23 @@
                                         onclick="document.getElementById('in_file_logo').value = ''">不要選擇檔案</button>
                                 </div>
                             </div>
+                            {% if current_user.has_role('admin') or current_user.has_role('gamemanager') %}
+                                <div class="form-group ">
+                                    <label for="in_approval" class="required-label">狀態</label>
+                                    <select id="in_approval"  name="in_approval" class="form-control"> 
+                                        {% for status in outstatuslist %}
+                                        <option value="{{ status }}" {% if status == outteam['狀態'] %}selected{% endif %}>{{ status }}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="in_valid" class="required-label">是否合格</label>
+                                    <select id="in_valid"  name="in_valid" class="form-control"> 
+                                        <option value="false" {% if outteam['是否合格'] == '否' %}selected{% endif %}>否</option> 
+                                        <option value="true" {% if outteam['是否合格'] == '是' %}selected{% endif %}>是</option>       
+                                    </select>
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-bs-dismiss="modal">取消</button>

@@ -23,6 +23,7 @@ app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 app.config['ALLOWED_EXTENSIONS'] = {'PDF', 'JPG', 'JPEG', 'PNG', 'HEIC', 'AI'}
 app.config['MAX_FILE_SIZE'] =  10 * 1024 * 1024  # 10MB 的位元組
 app.config['EXPORT_FOLDER'] = 'EXP_FOLDER'
+app.config['審核狀態'] = ['尚未審核','核准參賽','備取','審核不通過']
 app.config['GAME'] = {'賽事名稱':'2023興傳盃公益籃球邀請賽', '主辦':'國立中興大學EMBA校友會',
                       '協辦':'國立中興大學EMBA學生會、國立中興大學EMBA辦公室',
                       '執行':'國立中興大學EMBA籃球社',
@@ -191,7 +192,9 @@ def editteam_member(team_id):
             FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
     team_data = engine.execute(sql_team).fetchone()
     team_column_names = team_data.keys()
-    return render_template('output7.html', outdata=data, outheaders=column_names,outteam=team_data,outteamheader=team_column_names)
+    approval_statuslist = app.config['審核狀態']
+    return render_template('output7.html', outdata=data, outheaders=column_names,outteam=team_data,outteamheader=team_column_names,
+                           outstatuslist=approval_statuslist)
 
 
 @app.route('/editmember/', methods=['GET', 'POST'])
@@ -279,6 +282,8 @@ def edit_team(tid,pid):
         coach_name = request.values['in_coach'].strip()
         headcoach_name = request.values['in_hcoach'].strip()
         team_captain_name = request.values['in_captain'].strip()
+        approval_status = request.values['in_approval'].strip()
+        qualified = request.values['in_valid'].strip()
 
         conn = engine.connect()
         trans = conn.begin()
@@ -286,7 +291,8 @@ def edit_team(tid,pid):
             sql1 = f'''UPDATE "user" SET name='{ct_name}',phone='{phone}',mobile='{mobile}' WHERE id={pid} '''
             conn.execute(sql1)
             sql2 = f'''UPDATE team SET team_name='{team_name}', group_id='{group_name}', coach='{coach_name}',
-                head_coach='{headcoach_name}', team_captain='{team_captain_name}', update_time='now()' 
+                head_coach='{headcoach_name}', team_captain='{team_captain_name}', status='{approval_status}', 
+                qualified={qualified},update_time='now()' 
                 WHERE team_id={tid} '''
             conn.execute(sql2)
 

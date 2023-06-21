@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash, Res
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_security import UserMixin, RoleMixin, roles_accepted, Security, SQLAlchemySessionUserDatastore 
+from flask_security import UserMixin, RoleMixin, roles_accepted, Security, SQLAlchemySessionUserDatastore
 from sqlalchemy import create_engine
 from io import BytesIO
 from urllib.parse import quote
@@ -20,6 +20,9 @@ app.config['SECRET_KEY'] = 'fi13dE9fafkd9a0afklm81WEEd'
 app.config['SECURITY_PASSWORD_SALT'] = "uY939qAAZiqi939dfGQR2sDG9333SIkjWu"
 app.config['SECURITY_REGISTERABLE'] = True
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
+app.config['SECURITY_UNAUTHENTICATED_VIEW'] = '/mylogin'
+app.config['SECURITY_UNAUTHORIZED_VIEW'] = '/mylogin'
+app.config['SECURITY_LOGIN_USER_TEMPLATE'] = 'mylogin.html' # 更改default login page
 app.config['ALLOWED_EXTENSIONS'] = {'PDF', 'JPG', 'JPEG', 'PNG', 'HEIC', 'AI'}
 app.config['MAX_FILE_SIZE'] =  10 * 1024 * 1024  # 10MB 的位元組
 app.config['EXPORT_FOLDER'] = 'EXP_FOLDER'
@@ -35,15 +38,19 @@ app.config['GAME'] = {'賽事名稱':'2023興傳盃公益籃球邀請賽', '主�
                       '賽事狀態':'報名截止','賽事管理員':'vicfenny@gmail.com'}
 
 db = SQLAlchemy(app)
-login_manager = LoginManager(app)
+
+
+
+login_manager = LoginManager()
+login_manager.init_app(app)
 login_manager.login_view = 'mylogin'
 
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 
 # 自定義未授權處理程序
 @login_manager.unauthorized_handler
-def unauthorized():
-    return redirect(url_for('mylogin'))
+def unauthorized_callback():
+    return redirect(url_for('mylogin')) 
 
 # Setup User Model and link with database
 roles_users = db.Table('roles_users',
@@ -73,12 +80,12 @@ class Role(db.Model, RoleMixin):
 user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
 security = Security(app, user_datastore)
 
-
 # Load User
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+login_manager.user_loader(load_user)
 
 # Routes
 @app.route('/')
@@ -107,7 +114,7 @@ def user_dashboard():
 @app.route('/mylogin', methods=['GET', 'POST'])
 def mylogin():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(request.referrer or url_for('home'))
 
     if request.method == 'POST':
         email = request.form['email']
@@ -163,36 +170,49 @@ def get_teams(game_id):
     return render_template('show_teams.html', outgame_id=game_id, outdata=data_html)
 
 # member data database CRUD
-# 從registration table(球員資料表) 取得球員的team num(id)
-def get_teamid_fm_pid(pid):
-    sql = f'''SELECT team_num,pid FROM registration WHERE reg_pid ={pid} '''
-    data = engine.execute(sql).fetchone()
-    return data['team_num']
+
+# 從 team table(隊伍資料表) 取得隊伍的team id
+def get_teamid_fm_pid(ct_pid):
+    sql = f'''SELECT team_id FROM team WHERE contact_pid={ct_pid} '''
+    team_id = engine.execute(sql).fetchone()[0]
+    return team_id
 
 @app.route('/editteam_member/<int:team_id>', methods=['GET', 'POST'])
 @login_required
 @roles_accepted('admin', 'gamemanager', 'user')
 def editteam_member(team_id):
-    '''if current_user.has_role('admin') or current_user.has_role('gamemanager'):
-        condition = ''
-    else:'''
-    #team_id = get_teamid_fm_pid(current_user.id) 
-    condition =  f"WHERE team_num={team_id}"
-    sql = f'''SELECT reg_pid,jersey_number 背號,student_name 姓名,grade "EMBA級別",birthday 出生年月日,pid 身分證字號,
-        CASE WHEN islimited IS true THEN '✅' ELSE '' end as 限制球員,
-        CASE WHEN st_data IS NOT NULL THEN '_S' ELSE '' end as 大頭照
-        FROM registration {condition} ORDER BY reg_pid'''
-    data = engine.execute(sql)
-    column_names = data.keys()
-    sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile 備用手機,email 電子郵件,
-            coach 教練,head_coach 領隊,team_captain 隊長,
-            CASE WHEN sign_data IS NOT NULL THEN 'Y' ELSE '' END as 系辦蓋章,
-            CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "學校Logo",
-            status 狀態,CASE WHEN qualified IS true THEN '是' ELSE '否' END as 是否合格
-            FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
-    team_data = engine.execute(sql_team).fetchone()
-    team_column_names = team_data.keys()
-    approval_statuslist = app.config['審核狀態']
+    can_edit_team = False
+    if current_user.has_role('admin') or current_user.has_role('gamemanager'):
+        can_edit_team = True
+    else:
+        cur_u_team_id = get_teamid_fm_pid(current_user.id) 
+        if cur_u_team_id == team_id:
+            can_edit_team = True
+    if can_edit_team:
+        #condition =  f"WHERE team_num={team_id}"
+        sql = f'''SELECT reg_pid,jersey_number 背號,student_name 姓名,grade "EMBA級別",birthday 出生年月日,pid 身分證字號,
+            CASE WHEN islimited IS true THEN '✅' ELSE '' end as 限制球員,
+            CASE WHEN st_data IS NOT NULL THEN '_S' ELSE '' end as 大頭照
+            FROM registration WHERE team_num={team_id} ORDER BY reg_pid'''
+        data = engine.execute(sql)
+        column_names = data.keys()
+        sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile 備用手機,email 電子郵件,
+                coach 教練,head_coach 領隊,team_captain 隊長,
+                CASE WHEN sign_data IS NOT NULL THEN 'Y' ELSE '' END as 系辦蓋章,
+                CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "學校Logo",
+                status 狀態,CASE WHEN qualified IS true THEN '是' ELSE '否' END as 是否合格
+                FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
+        team_data = engine.execute(sql_team).fetchone()
+        team_column_names = team_data.keys()
+        approval_statuslist = app.config['審核狀態']
+    else:
+        flash(f"無權限，請確認！","danger")
+        ref = request.referrer
+        if ref:
+            return redirect(ref)
+        else:
+            return redirect(url_for('home'))
+        
     return render_template('output7.html', outdata=data, outheaders=column_names,outteam=team_data,outteamheader=team_column_names,
                            outstatuslist=approval_statuslist)
 

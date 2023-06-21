@@ -4,7 +4,7 @@
 <body>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="container-fluid">
+            <div class="container-fluid pt-5">
                 {% for category, message in messages %}
                     <div class="alert alert-{{category}} alert-dismissible" role="alert">
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -14,7 +14,7 @@
             </div>
         {% endif %}
     {% endwith %}
-    <div class="container mt-3">
+    <div class="container pt-5">
         <div class="card bg-light text-dark">
             <div class="card-header">
                 <h3 class="text-center">{{outgame_id}}</h3>

@@ -10,8 +10,9 @@ from urllib.parse import quote
 import pandas as pd
 from datetime import timedelta
 import os
-from openpyxl import load_workbook
+from openpyxl import load_workbook,drawing
 import zipfile
+from PIL import Image
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:123456@127.0.0.1:5432/sport'
@@ -581,13 +582,18 @@ def download(team_id):
     df1 = pd.DataFrame(engine.execute(sql_team))
 
     sql_reg = f'''SELECT jersey_number 背號,student_name 姓名,grade "EMBA級別",birthday 出生年月日,pid 身分證字號,
-        CASE WHEN islimited IS true THEN 'ｖ' ELSE '' end as 限制球員 
+        CASE WHEN islimited IS true THEN 'ｖ' ELSE '' end as 限制球員
         from REGISTRATION WHERE team_num={team_id} ORDER BY reg_pid'''
     df2 = pd.DataFrame(engine.execute(sql_reg))
+    
+    sql_reg_photo = f'''SELECT reg_pid, student_name 姓名, st_data FROM registration  
+                    WHERE team_num={team_id} ORDER BY reg_pid'''
+    data = engine.execute(sql_reg_photo)
+
     # 載入報名表範本
     template_path = os.path.join(app.root_path, 'templates', '報名表.xlsx')
     workbook = load_workbook(template_path)
-    sheet = workbook['Sheet1']
+    sheet = workbook['報名表資料']
     # 將 賽事名稱 資料存放至指定儲存格
     sheet['C1'].value = df1['game_id'].values[0]+'報名表(資料)'
     # 將 報名單位 資料存放至指定儲存格
@@ -614,6 +620,65 @@ def download(team_id):
         for col_num, value in enumerate(row, start=start_column):
             sheet.cell(row=start_row + index, column=col_num, value=value)
     
+    # 輸出報名表照片至報名表照片sheet
+    sheet = workbook['報名表照片']
+    sheet['B2'].value = df1['報名單位'].values[0]
+    sheet['E2'].value = df1['聯絡人'].values[0]
+    sheet['B3'].value = df1['電話'].values[0]
+    sheet['E3'].value = df1['備用手機'].values[0]
+    sheet['B4'].value = df1['電子郵件'].values[0]
+    # 輸出報名編號至儲存格
+    #names = df2['姓名'].tolist()
+    '''
+    names = [row['姓名'] for row in data]
+    num_names = len(names)
+    start_row = 7
+    start_column = 1
+
+    for i in range(num_names):
+        row = start_row + (i // 5) * 2
+        column = start_column + i % 5
+        sheet.cell(row=row, column=column, value=f"{i+1}.姓名：{names[i]}")
+    '''
+    # 将st_data按规则输出到Excel表格
+    num_photos = 0
+    start_row = 6
+    start_column = 1
+
+    for row in data:
+        pid = row['reg_pid']
+        name = row['姓名']
+        photo_data = row['st_data']
+
+        if photo_data: # 若相片存在
+            # 将二进制图片数据转换为PIL图片对象
+            image = Image.open(BytesIO(photo_data))
+            
+            # 暫存相片檔案至 EXPORT_FOLDER 
+            folder_path = os.path.join(app.root_path, app.config['EXPORT_FOLDER'])
+            file_path = os.path.join(folder_path,f"{pid}_{name}.jpg")
+            image.save(file_path)
+            
+            # 创建Excel图片对象
+            img = drawing.image.Image(file_path)
+            # 调整图片的大小和位置
+            img.width = 130
+            img.height = 120                                   
+            img_cell = sheet.cell(row=start_row, column=start_column)
+            sheet.add_image(img, img_cell.coordinate)
+
+        # 将姓名按规则输出到Excel表格
+        name_cell = sheet.cell(row=start_row + 1, column=start_column)
+        name_cell.value = f"{num_photos+1}.姓名：{name}"
+        # 控制每列最多輸出5張圖片及最多輸出5個姓名
+        num_photos += 1
+        if num_photos % 5 == 0:
+            start_row += 2
+            start_column = 1
+        else:
+            start_column += 1
+        
+
     #for row in dataframe_to_rows(df2, index=False, header=False):
     #    sheet.append(row)
     '''# 採用落地存檔,而將存檔直接輸出download
@@ -628,6 +693,17 @@ def download(team_id):
     # 將 Workbook 寫入緩衝區
     workbook.save(buffer)
     buffer.seek(0)  # 將緩衝區指標移回起始位置
+    
+    # 刪除相片暫存檔案
+    ToDel_folder_path = os.path.join(app.root_path,app.config['EXPORT_FOLDER'])
+    # 遍历文件夹中的所有文件
+    for filename in os.listdir(ToDel_folder_path):
+        file_path = os.path.join(ToDel_folder_path, filename)       
+        # 检查文件是否为JPEG格式
+        if filename.lower().endswith('.jpg'):
+            # 删除文件
+            os.remove(file_path)
+            
     return send_file(buffer, as_attachment=True, download_name=f"{df1['報名單位'].values[0]}_{df1['參賽組別'].values[0]}.xlsx",
     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 

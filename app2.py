@@ -174,8 +174,10 @@ def get_teams(game_id):
 # 從 team table(隊伍資料表) 取得隊伍的team id
 def get_teamid_fm_pid(ct_pid):
     sql = f'''SELECT team_id FROM team WHERE contact_pid={ct_pid} '''
-    team_id = engine.execute(sql).fetchone()[0]
-    return team_id
+    team_id = engine.execute(sql).fetchall()
+    # convert [(1,), (6,), (7,), (8,)] into [1, 6, 7, 8]
+    ls_team_id = [tid[0] for tid in team_id ]
+    return ls_team_id
 
 @app.route('/editteam_member/<int:team_id>', methods=['GET', 'POST'])
 @login_required
@@ -186,7 +188,7 @@ def editteam_member(team_id):
         can_edit_team = True
     else:
         cur_u_team_id = get_teamid_fm_pid(current_user.id) 
-        if cur_u_team_id == team_id:
+        if team_id in cur_u_team_id:
             can_edit_team = True
     if can_edit_team:
         #condition =  f"WHERE team_num={team_id}"

@@ -586,7 +586,7 @@ def download(team_id):
         from REGISTRATION WHERE team_num={team_id} ORDER BY reg_pid'''
     df2 = pd.DataFrame(engine.execute(sql_reg))
     
-    sql_reg_photo = f'''SELECT reg_pid, student_name 姓名, st_data FROM registration  
+    sql_reg_photo = f'''SELECT team_num, student_name 姓名, st_data FROM registration  
                     WHERE team_num={team_id} ORDER BY reg_pid'''
     data = engine.execute(sql_reg_photo)
 
@@ -620,7 +620,7 @@ def download(team_id):
         for col_num, value in enumerate(row, start=start_column):
             sheet.cell(row=start_row + index, column=col_num, value=value)
     
-    # 輸出報名表照片至報名表照片sheet
+    # 輸出報名表表頭資料至報名表照片sheet
     sheet = workbook['報名表照片']
     sheet['B2'].value = df1['報名單位'].values[0]
     sheet['E2'].value = df1['聯絡人'].values[0]
@@ -640,13 +640,13 @@ def download(team_id):
         column = start_column + i % 5
         sheet.cell(row=row, column=column, value=f"{i+1}.姓名：{names[i]}")
     '''
-    # 将st_data按规则输出到Excel表格
+    # 将st_data按规则输出到Excel表格, 從A6開始輸出相片, A7開始輸出姓名
     num_photos = 0
     start_row = 6
-    start_column = 1
+    start_column = 1 #欄位 A
 
     for row in data:
-        pid = row['reg_pid']
+        team_num = row['team_num']
         name = row['姓名']
         photo_data = row['st_data']
 
@@ -656,7 +656,7 @@ def download(team_id):
             
             # 暫存相片檔案至 EXPORT_FOLDER 
             folder_path = os.path.join(app.root_path, app.config['EXPORT_FOLDER'])
-            file_path = os.path.join(folder_path,f"{pid}_{name}.jpg")
+            file_path = os.path.join(folder_path,f"{team_num}_{name}.jpg")
             image.save(file_path)
             
             # 创建Excel图片对象
@@ -700,10 +700,10 @@ def download(team_id):
     for filename in os.listdir(ToDel_folder_path):
         file_path = os.path.join(ToDel_folder_path, filename)       
         # 检查文件是否为JPEG格式
-        if filename.lower().endswith('.jpg'):
+        if filename.startswith(str(team_num)) and filename.lower().endswith('.jpg'):
             # 删除文件
             os.remove(file_path)
-            
+
     return send_file(buffer, as_attachment=True, download_name=f"{df1['報名單位'].values[0]}_{df1['參賽組別'].values[0]}.xlsx",
     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 

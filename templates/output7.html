@@ -19,7 +19,7 @@
     <div class="container pt-5">
         <div class="card bg-light text-dark">
             <div class="card-header">
-                <h3 class="text-center">2023興傳盃公益籃球邀請賽</h3>
+                <h3 class="text-center">2023 第十屆全國 EMBA 籃球邀請賽</h3>
             </div>
             <div class="card-body" style="text-align: center;">
                 <table style="display: inline-block;">
@@ -206,8 +206,8 @@
                     {% endif %}    
                 {% endfor %}
                 <td align="right">
-                    <a href="{{ url_for('download_photo', team_id=outteam['team_id']) }}" class="btn btn-info btn-sm" >下載大頭照</a><br>
-                    <a href="{{ url_for('download', team_id=outteam['team_id']) }}" class="btn btn-info btn-sm" >下載報名表</a><br>
+                    <a href="{{ url_for('download_photo', team_id=outteam['team_id']) }}" class="btn btn-info btn-sm" >下載大頭照</a>
+                    <a href="{{ url_for('download', team_id=outteam['team_id']) }}" class="btn btn-info btn-sm" >下載報名表</a>
                     <button type="button" data-bs-toggle="modal" class="btn btn-primary btn-sm"
                         data-bs-target="#insert_person">
                         新增

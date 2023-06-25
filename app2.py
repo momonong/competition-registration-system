@@ -28,15 +28,15 @@ app.config['ALLOWED_EXTENSIONS'] = {'PDF', 'JPG', 'JPEG', 'PNG', 'HEIC', 'AI'}
 app.config['MAX_FILE_SIZE'] =  10 * 1024 * 1024  # 10MB 的位元組
 app.config['EXPORT_FOLDER'] = 'EXP_FOLDER'
 app.config['審核狀態'] = ['尚未審核','核准參賽','備取','審核不通過']
-app.config['GAME'] = {'賽事名稱':'2023興傳盃公益籃球邀請賽', '主辦':'國立中興大學EMBA校友會',
-                      '協辦':'國立中興大學EMBA學生會、國立中興大學EMBA辦公室',
-                      '執行':'國立中興大學EMBA籃球社',
-                      '比賽地點':'國立中興大學體育館B1及2F籃球場（台中市南區興大路145號）',
-                      '比賽開始日期':'2023/8/19','比賽結束日期':'2023/8/20',
-                      '參賽組別':{'挑戰組(不限齡)':'最多16隊','菁英組(43歲以上)':'最多8隊'},
-                      '開始報名日期':'即日起','截止報名日期':'2023/5/31 晚上24:00',
-                      '選手之夜報名截止時間':'2023/6/9 晚上24:00',
-                      '賽事狀態':'報名截止','賽事管理員':'vicfenny@gmail.com'}
+app.config['GAME'] = {'賽事名稱':'2023 第十屆全國 EMBA 籃球邀請賽', 
+                      '主辦':'國立成功大學、國立成功大學EMBA校友會、國立成功大學管理學院EMBA籃球社',
+                      '承辦':'國立成功大學管理學院EMBA籃球社',
+                      '比賽地點':'台南市成功大學中正堂及台南市健美洋行 3F(台南一中體育館)',
+                      '比賽開始日期':'2023 年 11 月 25 日(週六)','比賽結束日期':'2023 年 11 月 26 日(週日)',
+                      '參賽組別':{'挑戰賽':'上限 20 隊','經典賽':'上限 8 隊'},
+                      '開始繳費日期':'2023年7月10日 09:00','截止繳費日期':'2023年7月21日',
+                      '報名表(附件一)回傳日期':'2023/9/11 中午 12:00 前',
+                      '賽事狀態':'報名中','賽事管理員':'vicfenny@gmail.com'}
 
 db = SQLAlchemy(app)
 
@@ -150,6 +150,7 @@ def get_teams(game_id):
     if current_user.has_role('admin') or current_user.has_role('gamemanager'):
         condition = ''
     else:    
+        # 只有 user 權限時, 才能看到同隊伍的隊員資料
         condition = f" AND contact_pid='{current_user.id}'"
     sql = f'''SELECT team_id, team_name 報名單位, group_id 參賽組別, status 狀態, qualified 是否合格 FROM team 
         WHERE game_id='{game_id}' {condition} order by 報名單位, 參賽組別'''
@@ -203,7 +204,7 @@ def editteam_member(team_id):
                 coach 教練,head_coach 領隊,team_captain 隊長,
                 CASE WHEN sign_data IS NOT NULL THEN 'Y' ELSE '' END as 系辦蓋章,
                 CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "學校Logo",
-                status 狀態,CASE WHEN qualified IS true THEN '是' ELSE '否' END as 是否合格
+                CASE WHEN qualified IS true THEN '是' ELSE '否' END as 是否合格, status 狀態
                 FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
         team_data = engine.execute(sql_team).fetchone()
         team_column_names = team_data.keys()

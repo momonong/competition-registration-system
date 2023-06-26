@@ -193,7 +193,6 @@ def editteam_member(team_id):
         if team_id in cur_u_team_id:
             can_edit_team = True
     if can_edit_team:
-        #condition =  f"WHERE team_num={team_id}"
         sql = f'''SELECT reg_pid,jersey_number 背號,student_name 姓名,grade "EMBA級別",birthday 出生年月日,pid 身分證字號,
             CASE WHEN islimited IS true THEN '✅' ELSE '' end as 限制球員,
             CASE WHEN st_data IS NOT NULL THEN '_S' ELSE '' end as 大頭照
@@ -219,25 +218,6 @@ def editteam_member(team_id):
         
     return render_template('output7.html', outdata=data, outheaders=column_names,outteam=team_data,outteamheader=team_column_names,
                            outstatuslist=approval_statuslist)
-
-
-@app.route('/editmember/', methods=['GET', 'POST'])
-@app.route('/editmember/<team_id>', methods=['GET', 'POST'])
-@login_required
-@roles_accepted('admin', 'gamemanager', 'user')
-def editmember(team_id=''):
-    if current_user.has_role('admin') or current_user.has_role('gamemanager'):
-        condition = ''
-    else:    
-        condition = f"WHERE team_id='{current_user.team_id}'"
-    sql = f'''SELECT pid,school_name,team_id,student_name,email,phone,jersey_number,
-        CASE WHEN pid_data IS NOT NULL THEN '_Y' ELSE '' end as 身,
-        CASE WHEN st_data IS NOT NULL THEN '_S' ELSE '' end as 學, 
-        CASE WHEN er_data IS NOT NULL THEN '_E' ELSE '' end as 在
-        FROM registration {condition} ORDER BY team_id, update_time desc'''
-    data = engine.execute(sql)
-    column_names = data.keys()
-    return render_template('output5.html', outdata=data, outheaders=column_names)
 
 #新增隊伍資料
 @app.route('/add_team/<gid>/<int:ct_pid>', methods=['GET','POST'])
@@ -306,8 +286,12 @@ def edit_team(tid,pid):
         coach_name = request.values['in_coach'].strip()
         headcoach_name = request.values['in_hcoach'].strip()
         team_captain_name = request.values['in_captain'].strip()
-        approval_status = request.values['in_approval'].strip()
-        qualified = request.values['in_valid'].strip()
+        if current_user.has_role('admin') or current_user.has_role('gamemanager'):
+            approval_status = request.values['in_approval'].strip()
+            qualified = request.values['in_valid'].strip()
+            sql1_1 = f", status='{approval_status}', qualified={qualified}" 
+        else:
+            sql1_1 = ""
 
         conn = engine.connect()
         trans = conn.begin()
@@ -315,8 +299,7 @@ def edit_team(tid,pid):
             sql1 = f'''UPDATE "user" SET name='{ct_name}',phone='{phone}',mobile='{mobile}' WHERE id={pid} '''
             conn.execute(sql1)
             sql2 = f'''UPDATE team SET team_name='{team_name}', group_id='{group_name}', coach='{coach_name}',
-                head_coach='{headcoach_name}', team_captain='{team_captain_name}', status='{approval_status}', 
-                qualified={qualified},update_time='now()' 
+                head_coach='{headcoach_name}', team_captain='{team_captain_name}' {sql1_1}, update_time='now()' 
                 WHERE team_id={tid} '''
             conn.execute(sql2)
 

@@ -199,7 +199,7 @@ def editteam_member(team_id):
             FROM registration WHERE team_num={team_id} ORDER BY reg_pid'''
         data = engine.execute(sql)
         column_names = data.keys()
-        sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile 備用手機,email 電子郵件,
+        sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile "LINE ID",email 電子郵件,
                 coach 教練,head_coach 領隊,team_captain 隊長,
                 CASE WHEN sign_data IS NOT NULL THEN 'Y' ELSE '' END as 系辦蓋章,
                 CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "學校Logo",
@@ -586,7 +586,7 @@ def download(team_id):
     sheet['F3'].value = df1['聯絡人'].values[0]
     # 將 電話 資料存放至指定儲存格
     sheet['C4'].value = df1['電話'].values[0]
-    # 將 備用手機 資料存放至指定儲存格
+    # 將 LINE_ID 資料存放至指定儲存格
     sheet['F4'].value = df1['LINE_ID'].values[0]
     # 將 電子郵件 資料從存放至指定儲存格
     sheet['C5'].value = df1['電子郵件'].values[0]

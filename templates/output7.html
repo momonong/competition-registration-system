@@ -297,6 +297,13 @@
                                             <option value="true" {% if row.限制球員 == '✅' %}selected{% endif %}>是</option>       
                                         </select>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="in_teacher" class="required-label">教職員</label>
+                                        <select id="in_teacher"  name="in_teacher" class="form-control"> 
+                                            <option value="false" {% if row.教職員 == '' %}selected{% endif %}>否</option> 
+                                            <option value="true" {% if row.教職員 == '✅' %}selected{% endif %}>是</option>       
+                                        </select>
+                                    </div>
                                     
                                     <div class="form-group ">
                                         <label for="in_file">大頭照檔案<font color="grey"><sub>（只限JPEG格式）</sub>
@@ -378,6 +385,13 @@
                                             <option value="true" {% if row.限制球員 == '✅' %}selected{% endif %}>是</option>       
                                         </select>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="in_teacher" class="required-label">教職員</label>
+                                        <select id="in_teacher"  name="in_teacher" class="form-control" disabled> 
+                                            <option value="false" {% if row.教職員 == '' %}selected{% endif %}>否</option> 
+                                            <option value="true" {% if row.教職員 == '✅' %}selected{% endif %}>是</option>       
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-bs-dismiss="modal">取消</button>
@@ -431,6 +445,13 @@
                             <div class="form-group">
                                 <label for="in_limited" class="required-label">限制球員</label>
                                 <select id="in_limited"  name="in_limited" class="form-control" required> 
+                                    <option value="false" selected>否</option> 
+                                    <option value="true">是</option>       
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="in_teacher" class="required-label">教職員</label>
+                                <select id="in_teacher"  name="in_teacher" class="form-control" required> 
                                     <option value="false" selected>否</option> 
                                     <option value="true">是</option>       
                                 </select>

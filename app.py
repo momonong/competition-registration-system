@@ -195,6 +195,7 @@ def editteam_member(team_id):
     if can_edit_team:
         sql = f'''SELECT reg_pid,jersey_number 背號,student_name 姓名,grade "EMBA級別",birthday 出生年月日,pid 身分證字號,
             CASE WHEN islimited IS true THEN '✅' ELSE '' end as 限制球員,
+            CASE WHEN isteacher IS true THEN '✅' ELSE '' end as 教職員,
             CASE WHEN st_data IS NOT NULL THEN '_S' ELSE '' end as 大頭照
             FROM registration WHERE team_num={team_id} ORDER BY reg_pid'''
         data = engine.execute(sql)
@@ -234,7 +235,8 @@ def add_team(gid,ct_pid):
         trans = conn.begin()
         try:
             sql1 = f''' INSERT INTO team(team_name,game_id,group_id,contact_pid,coach,head_coach,team_captain,status) 
-                VALUES('{team_name}','{gid}','{group_name}',{ct_pid},'{coach_name}','{headcoach_name}','{team_captain_name}','尚未審核')  '''
+                VALUES('{team_name}','{gid}','{group_name}',{ct_pid},'{coach_name}','{headcoach_name}',
+                '{team_captain_name}','尚未審核')  '''
             conn.execute(sql1)
             sql2 = f''' SELECT MAX(team_id) FROM team '''
             tid = conn.execute(sql2).fetchone()[0] #取得新增的自動編號team_id
@@ -273,7 +275,7 @@ def add_team(gid,ct_pid):
 
     return redirect(url_for('editteam_member', team_id=new_teamid))
 
-#修改隊伍資料
+#修改隊伍(聯絡人)資料
 @app.route('/edit_team/<int:tid>/<int:pid>', methods=['GET','POST'])
 @login_required
 def edit_team(tid,pid):
@@ -357,6 +359,7 @@ def add_person(tid):
         birthday = request.values['in_birthday'].strip()
         pid = request.values['in_pid'].strip()
         islimited = request.values['in_limited'].strip()
+        isteacher = request.values['in_teacher'].strip()
 
         conn = engine.connect()
         trans = conn.begin()
@@ -374,8 +377,8 @@ def add_person(tid):
                 if file and file_size > app.config['MAX_FILE_SIZE']:
                     raise Exception(f"檔案太大,無法上傳,不能>{app.config['MAX_FILE_SIZE']}Bytes")
             #team_num = get_teamid_fm_pid(current_user.id)
-            sql1 = f'''insert into registration(jersey_number,student_name,grade,birthday,pid,islimited,team_num ) 
-                values ('{jersey_number}','{name}','{grade}','{birthday}','{pid}','{islimited}',{tid})'''
+            sql1 = f'''insert into registration(jersey_number,student_name,grade,birthday,pid,islimited,isteacher,team_num ) 
+                values ('{jersey_number}','{name}','{grade}','{birthday}','{pid}','{islimited}','{isteacher}',{tid})'''
             conn.execute(sql1)
             sql2 = f'''select max(reg_pid) from registration'''
             result = conn.execute(sql2)
@@ -416,6 +419,7 @@ def edit_person(reg_pid):
         birthday = request.values['in_birthday'].strip()
         pid = request.values['in_pid'].strip()
         islimited = request.values['in_limited'].strip()
+        isteacher = request.values['in_teacher'].strip()
         
         conn = engine.connect()
         trans = conn.begin()
@@ -433,9 +437,8 @@ def edit_person(reg_pid):
                 if file and file_size > app.config['MAX_FILE_SIZE']:
                     raise Exception(f"檔案太大,無法上傳,不能>{app.config['MAX_FILE_SIZE']}Bytes")
             sql1 = f'''UPDATE registration SET jersey_number='{jersey_number}',student_name='{name}',
-                birthday='{birthday}',pid='{pid}',
-                grade='{grade}',islimited={islimited}, update_time='now()' 
-                WHERE reg_pid={reg_pid} '''
+                birthday='{birthday}',pid='{pid}',grade='{grade}',islimited={islimited}, isteacher={isteacher},
+                update_time='now()' WHERE reg_pid={reg_pid} '''
             conn.execute(sql1)
 
             for iboxname, file in request.files.items():
@@ -566,7 +569,8 @@ def download(team_id):
     df1 = pd.DataFrame(engine.execute(sql_team))
 
     sql_reg = f'''SELECT jersey_number 背號,student_name 姓名,grade "EMBA級別",birthday 出生年月日,pid 身分證字號,
-        CASE WHEN islimited IS true THEN 'ｖ' ELSE '' end as 限制球員
+        CASE WHEN islimited IS true THEN 'ｖ' ELSE '' end as 限制球員,
+        CASE WHEN isteacher IS true THEN 'ｖ' ELSE '' end as 教職員
         from REGISTRATION WHERE team_num={team_id} ORDER BY reg_pid'''
     df2 = pd.DataFrame(engine.execute(sql_reg))
     

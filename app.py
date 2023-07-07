@@ -13,12 +13,18 @@ import os
 from openpyxl import load_workbook,drawing
 import zipfile
 from PIL import Image
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:123456@127.0.0.1:5432/sport'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:123456@127.0.0.1:5432/sport'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+app.config['SECURITY_PASSWORD_SALT'] = os.getenv("SECURITY_PASSWORD_SALT")
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=4)
-app.config['SECRET_KEY'] = 'fi13dE9fafkd9a0afklm81WEEd'
-app.config['SECURITY_PASSWORD_SALT'] = "uY939qAAZiqi939dfGQR2sDG9333SIkjWu"
+#app.config['SECRET_KEY'] = 'fi13dE9fafkd9a0afklm81WEEd'
+#app.config['SECURITY_PASSWORD_SALT'] = "uY939qAAZiqi939dfGQR2sDG9333SIkjWu"
 app.config['SECURITY_REGISTERABLE'] = True
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 app.config['SECURITY_UNAUTHENTICATED_VIEW'] = '/mylogin'

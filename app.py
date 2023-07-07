@@ -131,7 +131,7 @@ def mylogin():
         if user and user.password == password:
             login_user(user)
             flash('登入成功！', 'success')
-            return redirect(url_for('get_teams', game_id='2023興傳盃公益籃球邀請賽') )
+            return redirect(url_for('get_teams', game_id='2023 第十屆全國 EMBA 籃球邀請賽') )
         else:
             flash('email 或 password 錯誤！請重試！', 'danger')
 

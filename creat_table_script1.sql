@@ -5,25 +5,26 @@
 CREATE TABLE IF NOT EXISTS public.registration
 (
     reg_pid integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
-    pid character varying collate pg_catalog."default" not null,
-	school_name character varying COLLATE pg_catalog."default",
-	team_id character varying collate pg_catalog."default", 
+    pid character varying COLLATE pg_catalog."default" NOT NULL,
+    school_name character varying COLLATE pg_catalog."default",
+    team_id character varying COLLATE pg_catalog."default",
     student_name character varying COLLATE pg_catalog."default" NOT NULL,
     email character varying COLLATE pg_catalog."default",
     phone character varying COLLATE pg_catalog."default",
     jersey_number character varying COLLATE pg_catalog."default",
-	team_num integer,
+    team_num integer,
     grade character varying COLLATE pg_catalog."default",
     birthday date,
     islimited boolean,
-    update_time timestamp without time zone default current_timestamp,
+    update_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     pid_filename character varying COLLATE pg_catalog."default",
     pid_data bytea,
     st_filename character varying COLLATE pg_catalog."default",
     st_data bytea,
     er_filename character varying COLLATE pg_catalog."default",
     er_data bytea,
-	constraint registration_pkey primary key (reg_pid)
+    isteacher boolean,
+    CONSTRAINT registration_pkey PRIMARY KEY (reg_pid)
 )
 
 TABLESPACE pg_default;

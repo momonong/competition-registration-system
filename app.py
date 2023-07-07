@@ -46,7 +46,7 @@ app.config['GAME'] = {'賽事名稱':'2023 第十屆全國 EMBA 籃球邀請賽'
 
 db = SQLAlchemy(app)
 
-
+  
 
 login_manager = LoginManager()
 login_manager.init_app(app)

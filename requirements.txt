@@ -10,5 +10,4 @@ psycopg2==2.9.3
 python-dotenv==1.0.0
 Pillow==9.5.0
 SQLAlchemy==1.4.39
-Python==3.10.4
 

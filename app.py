@@ -647,7 +647,7 @@ def download(team_id):
         team_num = row['team_num']
         name = row['姓名']
         photo_data = row['st_data']
-
+        '''
         if photo_data: # 若相片存在
             # 将二进制图片数据转换为PIL图片对象
             image = Image.open(BytesIO(photo_data))
@@ -675,7 +675,7 @@ def download(team_id):
             start_column = 1
         else:
             start_column += 1
-        
+        '''
 
     #for row in dataframe_to_rows(df2, index=False, header=False):
     #    sheet.append(row)

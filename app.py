@@ -654,7 +654,7 @@ def download(team_id):
         team_num = row['team_num']
         name = row['姓名']
         photo_data = row['st_data']
-
+        
         if photo_data: # 若相片存在
             # 将二进制图片数据转换为PIL图片对象
             image = Image.open(BytesIO(photo_data))
@@ -708,7 +708,7 @@ def download(team_id):
         if filename.startswith(str(team_num)) and filename.lower().endswith('.jpg'):
             # 删除文件
             os.remove(file_path)
-
+    
     return send_file(buffer, as_attachment=True, download_name=f"{df1['報名單位'].values[0]}_{df1['參賽組別'].values[0]}.xlsx",
     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 

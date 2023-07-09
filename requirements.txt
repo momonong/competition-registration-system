@@ -1,0 +1,15 @@
+email-validator==2.0.0.post2
+Flask==2.2.2
+Flask-Login==0.6.2
+Flask-Security==3.0.0
+Flask-SQLAlchemy==3.0.3
+Jinja2==3.1.2
+jinja2-time==0.2.0
+openpyxl==3.0.10
+pandas==1.5.3
+psycopg2==2.9.3
+python-dotenv==1.0.0
+Pillow==9.5.0
+SQLAlchemy==1.4.39
+gunicorn
+

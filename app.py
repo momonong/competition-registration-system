@@ -123,7 +123,7 @@ def user_dashboard():
 def mylogin():
     if current_user.is_authenticated:
         return redirect(request.referrer or url_for('home'))
-    global captcha_ans
+    global captcha_ans, img_url
     if request.method != 'POST':
         img_url, captcha_ans = generate_captcha(6)
         print(captcha_ans)
@@ -138,6 +138,7 @@ def mylogin():
                 flash('登入成功！', 'success')
                 return redirect(url_for('get_teams', game_id='2023 第十屆全國 EMBA 籃球邀請賽') )
             else:
+                img_url, captcha_ans = generate_captcha(6)
                 flash('驗證碼錯誤！請重試！', 'danger')
         else:
             flash('email 或 password 錯誤！請重試！', 'danger')

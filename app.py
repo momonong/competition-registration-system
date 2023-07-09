@@ -2,7 +2,7 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, Response,send_file,make_response
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
+# from werkzeug.security import generate_password_hash, check_password_hash
 from flask_security import UserMixin, RoleMixin, roles_accepted, Security, SQLAlchemySessionUserDatastore
 from sqlalchemy import create_engine
 from io import BytesIO
@@ -14,6 +14,7 @@ from openpyxl import load_workbook,drawing
 import zipfile
 from PIL import Image
 from dotenv import load_dotenv
+from auth_code import generate_captcha
 
 load_dotenv()
 
@@ -122,20 +123,26 @@ def user_dashboard():
 def mylogin():
     if current_user.is_authenticated:
         return redirect(request.referrer or url_for('home'))
-
+    global captcha_ans
+    if request.method != 'POST':
+        img_url, captcha_ans = generate_captcha(6)
+        print(captcha_ans)
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-
+        email = request.form['email'].strip()
+        password = request.form['password'].strip()
+        captcha = request.form['captcha'].strip()
         user = User.query.filter_by(email=email).first()
         if user and user.password == password:
-            login_user(user)
-            flash('登入成功！', 'success')
-            return redirect(url_for('get_teams', game_id='2023 第十屆全國 EMBA 籃球邀請賽') )
+            if captcha == captcha_ans:
+                login_user(user)
+                flash('登入成功！', 'success')
+                return redirect(url_for('get_teams', game_id='2023 第十屆全國 EMBA 籃球邀請賽') )
+            else:
+                flash('驗證碼錯誤！請重試！', 'danger')
         else:
             flash('email 或 password 錯誤！請重試！', 'danger')
 
-    return render_template('mylogin.html')
+    return render_template('mylogin.html', img_url=img_url)
 
 @app.route('/logout')
 @login_required

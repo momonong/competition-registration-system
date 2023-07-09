@@ -691,7 +691,7 @@ def download(team_id):
     # 將 Workbook 寫入緩衝區
     workbook.save(buffer)
     buffer.seek(0)  # 將緩衝區指標移回起始位置
-    
+    '''
     # 刪除相片暫存檔案
     ToDel_folder_path = os.path.join(app.root_path,app.config['EXPORT_FOLDER'])
     # 遍历文件夹中的所有文件
@@ -701,7 +701,7 @@ def download(team_id):
         if filename.startswith(str(team_num)) and filename.lower().endswith('.jpg'):
             # 删除文件
             os.remove(file_path)
-
+    '''
     return send_file(buffer, as_attachment=True, download_name=f"{df1['報名單位'].values[0]}_{df1['參賽組別'].values[0]}.xlsx",
     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 

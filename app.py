@@ -125,7 +125,7 @@ def mylogin():
         return redirect(request.referrer or url_for('home'))
     global captcha_ans, img_url
     if request.method != 'POST':
-        img_url, captcha_ans = generate_captcha(6)
+        img_url, captcha_ans = generate_captcha(5)
         print(captcha_ans)
     if request.method == 'POST':
         email = request.form['email'].strip()
@@ -265,7 +265,7 @@ def add_team(gid,ct_pid):
                 raise Exception(f"{file_extension}檔案格式不能上傳")
             #若HTML表單有選擇檔案, 但檔案大小超過規定, 則禁止新增, 並拋送Exception訊息
             if file and file_size > app.config['MAX_FILE_SIZE']:
-                raise Exception(f"檔案太大,無法上傳,不能>{app.config['MAX_FILE_SIZE']}Bytes")
+                raise Exception(f"檔案太大,無法上傳,不能>{app.config['MAX_FILE_SIZE']/(1024*1024)}MB")
             
             for iboxname, file in request.files.items():
                 # 若HTML表單有選擇檔案, 根據input box name而決定更新資料庫對應檔案欄位, 則更新檔案

@@ -1,10 +1,11 @@
 from captcha.image import ImageCaptcha
-from flask import url_for
+from flask import url_for, session
 import random
+
 
 def generate_captcha(code_length):
     # 生成隨機數字
-    code = ''.join(random.choices('0123456789', k=code_length))
+    code = ''.join(random.choices('02345689', k=code_length))
 
     # 創建驗證碼圖像
     captcha = ImageCaptcha()

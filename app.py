@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask, render_template, redirect, url_for, request, flash, Response,send_file,make_response
+from flask import Flask, render_template, redirect, url_for, request, flash, Response,send_file,make_response, session
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 # from werkzeug.security import generate_password_hash, check_password_hash
@@ -19,13 +19,10 @@ from auth_code import generate_captcha
 load_dotenv()
 
 app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://admin:123456@127.0.0.1:5432/sport'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['SECURITY_PASSWORD_SALT'] = os.getenv("SECURITY_PASSWORD_SALT")
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=4)
-#app.config['SECRET_KEY'] = 'fi13dE9fafkd9a0afklm81WEEd'
-#app.config['SECURITY_PASSWORD_SALT'] = "uY939qAAZiqi939dfGQR2sDG9333SIkjWu"
 app.config['SECURITY_REGISTERABLE'] = True
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 app.config['SECURITY_UNAUTHENTICATED_VIEW'] = '/mylogin'
@@ -123,27 +120,33 @@ def user_dashboard():
 def mylogin():
     if current_user.is_authenticated:
         return redirect(request.referrer or url_for('home'))
-    global captcha_ans, img_url
     if request.method != 'POST':
         img_url, captcha_ans = generate_captcha(5)
-        print(captcha_ans)
+        session['img_url'] = img_url
+        session['captcha_ans'] = captcha_ans
+        # print(session['captcha_ans'])
     if request.method == 'POST':
         email = request.form['email'].strip()
         password = request.form['password'].strip()
         captcha = request.form['captcha'].strip()
         user = User.query.filter_by(email=email).first()
         if user and user.password == password:
-            if captcha == captcha_ans:
+            if captcha == session['captcha_ans']:
                 login_user(user)
                 flash('登入成功！', 'success')
                 return redirect(url_for('get_teams', game_id='2023 第十屆全國 EMBA 籃球邀請賽') )
             else:
-                img_url, captcha_ans = generate_captcha(6)
+                img_url, captcha_ans = generate_captcha(5)
+                session['img_url'] = img_url
+                session['captcha_ans'] = captcha_ans
                 flash('驗證碼錯誤！請重試！', 'danger')
         else:
-            flash('email 或 password 錯誤！請重試！', 'danger')
+            img_url, captcha_ans = generate_captcha(5)
+            session['img_url'] = img_url
+            session['captcha_ans'] = captcha_ans            
+            flash('email 或 password 錯誤！請重試！', 'danger')  
 
-    return render_template('mylogin.html', img_url=img_url)
+    return render_template('mylogin.html', img_url=session['img_url'])
 
 @app.route('/logout')
 @login_required

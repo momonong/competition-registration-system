@@ -63,7 +63,7 @@
         </div>
         {% if current_user.is_authenticated %}
         <span class="navbar-text">
-          您好：{{ current_user.name }}({{ current_user.email }})
+          您好：{{ current_user.name }} {{ current_user.account }}
           {% for role in current_user.roles%}
             ({{role.name}})
           {% endfor %}

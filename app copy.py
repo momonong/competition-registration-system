@@ -72,7 +72,6 @@ class User(db.Model, UserMixin):
     team_id = db.Column(db.String)
     phone = db.Column(db.String)
     mobile = db.Column(db.String)
-    account = db.Column(db.String)
     # backreferences the user_id from roles_users table
     roles = db.relationship('Role', secondary=roles_users, backref='roled')
  
@@ -127,12 +126,10 @@ def mylogin():
         session['captcha_ans'] = captcha_ans
         # print(session['captcha_ans'])
     if request.method == 'POST':
-        # email = request.form['email'].strip()
-        account = request.form['account'].strip()
+        email = request.form['email'].strip()
         password = request.form['password'].strip()
         captcha = request.form['captcha'].strip()
-        # user = User.query.filter_by(email=email).first()
-        user = User.query.filter_by(account=account).first()
+        user = User.query.filter_by(email=email).first()
         if user and user.password == password:
             if captcha == session['captcha_ans']:
                 login_user(user)
@@ -147,7 +144,7 @@ def mylogin():
             img_url, captcha_ans = generate_captcha(5)
             session['img_url'] = img_url
             session['captcha_ans'] = captcha_ans            
-            flash('帳號 或 密碼 錯誤！請重試！', 'danger')  
+            flash('email 或 password 錯誤！請重試！', 'danger')  
 
     return render_template('mylogin.html', img_url=session['img_url'])
 
@@ -220,7 +217,7 @@ def editteam_member(team_id):
             FROM registration WHERE team_num={team_id} ORDER BY reg_pid'''
         data = engine.execute(sql)
         column_names = data.keys()
-        sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile "LINE ID",email 電子郵件,account 帳號, 
+        sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile "LINE ID",email 電子郵件,
                 coach 教練,head_coach 領隊,team_captain 隊長,
                 CASE WHEN sign_data IS NOT NULL THEN 'Y' ELSE '' END as 系辦蓋章,
                 CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "學校Logo",
@@ -237,7 +234,7 @@ def editteam_member(team_id):
         else:
             return redirect(url_for('home'))
         
-    return render_template('output7.html', outdata=data,    headers=column_names,outteam=team_data,outteamheader=team_column_names,
+    return render_template('output7.html', outdata=data, outheaders=column_names,outteam=team_data,outteamheader=team_column_names,
                            outstatuslist=approval_statuslist)
 
 #新增隊伍資料
@@ -303,7 +300,6 @@ def edit_team(tid,pid):
         ct_name = request.values['in_ctname'].strip()
         phone = request.values['in_phone'].strip()
         mobile = request.values['in_mobile'].strip()
-        email = request.values['in_email'].strip()
         team_name = request.values['in_tname'].strip()
         group_name = request.values['in_group'].strip()
         coach_name = request.values['in_coach'].strip()
@@ -319,8 +315,7 @@ def edit_team(tid,pid):
         conn = engine.connect()
         trans = conn.begin()
         try:
-            sql1 = f'''UPDATE "user" SET name='{ct_name}',phone='{phone}',mobile='{mobile}',email='{email}' 
-                WHERE id={pid} '''
+            sql1 = f'''UPDATE "user" SET name='{ct_name}',phone='{phone}',mobile='{mobile}' WHERE id={pid} '''
             conn.execute(sql1)
             sql2 = f'''UPDATE team SET team_name='{team_name}', group_id='{group_name}', coach='{coach_name}',
                 head_coach='{headcoach_name}', team_captain='{team_captain_name}' {sql1_1}, update_time='now()' 

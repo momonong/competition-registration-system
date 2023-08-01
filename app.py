@@ -220,7 +220,7 @@ def editteam_member(team_id):
             FROM registration WHERE team_num={team_id} ORDER BY reg_pid'''
         data = engine.execute(sql)
         column_names = data.keys()
-        sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile "LINE ID",email 電子郵件,account 帳號, 
+        sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile "LINE ID",email 電子郵件,
                 coach 教練,head_coach 領隊,team_captain 隊長,
                 CASE WHEN sign_data IS NOT NULL THEN 'Y' ELSE '' END as 系辦蓋章,
                 CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "學校Logo",
@@ -237,7 +237,7 @@ def editteam_member(team_id):
         else:
             return redirect(url_for('home'))
         
-    return render_template('output7.html', outdata=data,    headers=column_names,outteam=team_data,outteamheader=team_column_names,
+    return render_template('output7.html', outdata=data,outheaders=column_names,outteam=team_data,outteamheader=team_column_names,
                            outstatuslist=approval_statuslist)
 
 #新增隊伍資料

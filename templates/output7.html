@@ -37,6 +37,11 @@
                             <a href="{{ url_for('showfile', ftype='LOGO', reg_pid=outteam['team_id']) }}" data-toggle="tooltip"
                                 title="查看學校Logo檔案" class="text-decoration-none" target="_blank">📎</a>
                             </td>
+                        {% elif head == '授課證明' and outteam['授課證明'] =='Y' %}
+                        <td align="left">
+                            <a href="{{ url_for('showfile', ftype='VERIFY', reg_pid=outteam['team_id']) }}" data-toggle="tooltip"
+                                title="查看教職員授課證明" class="text-decoration-none" target="_blank">📎</a>
+                            </td>
                         {% else %}
                             <td align="left">{{outteam[head]}}</td>
                         {% endif %}
@@ -154,6 +159,27 @@
                                         value="outteam['學校Logo']" placeholder="學校Logo檔案" />
                                     <button type="button" class="btn btn-link"
                                         onclick="document.getElementById('in_file_logo').value = ''">不要選擇檔案</button>
+                                </div>
+                            </div>
+                            <div class="form-group ">
+                                <label for="in_file">教職員授課證明<font color="grey"><sub>（只限PDF格式）</sub>
+                                    </font></label>
+                                {% if outteam['授課證明'] =='Y' %}
+                                <div class="form-control">
+                                    <a href="{{ url_for('showfile', ftype='VERIFY', reg_pid=outteam['team_id']) }}"
+                                        target="_blank">檢視已上傳檔案</a>
+                                    <input type="checkbox" name="in_rmverifyexistfile" id="in_rmverifyexistfile"
+                                        value="VERIFY" />
+                                    <label for="in_rmverifyexistfile">移除已上傳檔案</label>
+                                </div>
+                                {% endif %}
+                                <div class="form-control">
+                                    <input type="file"
+                                        accept="application/pdf"
+                                        name="in_file_veri" id="in_file_veri"
+                                        value="outteam['授課證明']" placeholder="教職員授課證明" />
+                                    <button type="button" class="btn btn-link"
+                                        onclick="document.getElementById('in_file_veri').value = ''">不要選擇檔案</button>
                                 </div>
                             </div>
                             {% if current_user.has_role('admin') or current_user.has_role('gamemanager') %}

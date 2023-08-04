@@ -224,6 +224,7 @@ def editteam_member(team_id):
                 coach 教練,head_coach 領隊,team_captain 隊長,
                 CASE WHEN sign_data IS NOT NULL THEN 'Y' ELSE '' END as 系辦蓋章,
                 CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "學校Logo",
+                CASE WHEN veri_data IS NOT NULL THEN 'Y' ELSE '' END as "授課證明",
                 CASE WHEN qualified IS true THEN '是' ELSE '否' END as 是否合格, status 狀態
                 FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
         team_data = engine.execute(sql_team).fetchone()
@@ -282,7 +283,9 @@ def add_team(gid,ct_pid):
                     elif iboxname.upper() == 'IN_FILE_LOGO':
                         sql2_1 ="UPDATE team SET logo_filename=%s, logo_data=%s WHERE team_id=%s"
                         conn.execute(sql2_1, file.filename, file.read(), tid)
-
+                    elif iboxname.upper() == 'IN_FILE_VERI':
+                        sql2_2 ="UPDATE team SET veri_filename=%s, veri_data=%s WHERE team_id=%s"
+                        conn.execute(sql2_2, file.filename, file.read(), tid)
             trans.commit()
             flash("新增隊伍資料成功","primary")
         except Exception as e:
@@ -349,7 +352,9 @@ def edit_team(tid,pid):
                     elif iboxname.upper() == 'IN_FILE_LOGO':
                         sql2_1 ="UPDATE team SET logo_filename=%s, logo_data=%s WHERE team_id=%s"
                         conn.execute(sql2_1, file.filename, file.read(), tid)
-                        
+                    elif iboxname.upper() == 'IN_FILE_VERI':
+                        sql2_2 ="UPDATE team SET veri_filename=%s, veri_data=%s WHERE team_id=%s"
+                        conn.execute(sql2_2, file.filename, file.read(), tid)
                 # 若HTML表單未選擇檔案, 並且勾選移除已上傳檔案, 則清除資料庫檔案
                 elif not(file.filename):
                     if iboxname.upper()=='IN_FILE_SIGNDOC' and request.form.get('in_rmsigndocexistfile')=='SIGNDOC':
@@ -358,7 +363,9 @@ def edit_team(tid,pid):
                     elif iboxname.upper()=='IN_FILE_LOGO' and request.form.get('in_rmlogoexistfile')=='LOGO':
                         sql3_1 ="UPDATE team SET logo_filename=null, logo_data=null WHERE team_id=%s"
                         conn.execute(sql3_1, tid)
-
+                    elif iboxname.upper()=='IN_FILE_VERI' and request.form.get('in_rmverifyexistfile')=='VERIFY':
+                        sql3_2 ="UPDATE team SET veri_filename=null, veri_data=null WHERE team_id=%s"
+                        conn.execute(sql3_2, tid)
             trans.commit()
             flash("修改隊伍資料成功","primary")
         except Exception as e:
@@ -548,6 +555,11 @@ def showfile(ftype,reg_pid):
                 case 'LOGO':
                     fname = 'logo_filename'
                     fdata = 'logo_data'
+                    tablename = 'team'
+                    idname = 'team_id'
+                case 'VERIFY':
+                    fname = 'veri_filename'
+                    fdata = 'veri_data'
                     tablename = 'team'
                     idname = 'team_id'
             sql = f"select {fname},{fdata} from {tablename} where {idname}={reg_pid}"

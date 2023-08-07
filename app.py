@@ -73,6 +73,7 @@ class User(db.Model, UserMixin):
     phone = db.Column(db.String)
     mobile = db.Column(db.String)
     account = db.Column(db.String)
+    ctname = db.Column(db.String)
     # backreferences the user_id from roles_users table
     roles = db.relationship('Role', secondary=roles_users, backref='roled')
  
@@ -220,7 +221,7 @@ def editteam_member(team_id):
             FROM registration WHERE team_num={team_id} ORDER BY reg_pid'''
         data = engine.execute(sql)
         column_names = data.keys()
-        sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile "LINE ID",email 電子郵件,
+        sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,ctname 聯絡人,phone 電話,mobile "LINE ID",email 電子郵件,
                 coach 教練,head_coach 領隊,team_captain 隊長,
                 CASE WHEN sign_data IS NOT NULL THEN 'Y' ELSE '' END as 系辦蓋章,
                 CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "學校Logo",
@@ -322,7 +323,7 @@ def edit_team(tid,pid):
         conn = engine.connect()
         trans = conn.begin()
         try:
-            sql1 = f'''UPDATE "user" SET name='{ct_name}',phone='{phone}',mobile='{mobile}',email='{email}' 
+            sql1 = f'''UPDATE "user" SET ctname='{ct_name}',phone='{phone}',mobile='{mobile}',email='{email}' 
                 WHERE id={pid} '''
             conn.execute(sql1)
             sql2 = f'''UPDATE team SET team_name='{team_name}', group_id='{group_name}', coach='{coach_name}',
@@ -597,7 +598,7 @@ def showfile(ftype,reg_pid):
 @roles_accepted('admin', 'gamemanager', 'user')
 def download(team_id):
 
-    sql_team = f'''SELECT A.game_id,A.team_id,B.id,team_name 報名單位,group_id 參賽組別,name 聯絡人,phone 電話,mobile "LINE_ID",email 電子郵件,
+    sql_team = f'''SELECT A.game_id,A.team_id,B.id,team_name 報名單位,group_id 參賽組別,ctname 聯絡人,phone 電話,mobile "LINE_ID",email 電子郵件,
             coach 教練,head_coach 領隊,team_captain 隊長
             FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
     df1 = pd.DataFrame(engine.execute(sql_team))

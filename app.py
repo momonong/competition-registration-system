@@ -684,6 +684,7 @@ def download(team_id):
             # 暫存相片檔案至 EXPORT_FOLDER 
             folder_path = os.path.join(app.root_path, app.config['EXPORT_FOLDER'])
             file_path = os.path.join(folder_path,f"{team_num}_{name}.jpg")
+            image = image.convert('RGB')
             image.save(file_path)
             
             # 创建Excel图片对象

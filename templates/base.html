@@ -47,6 +47,9 @@
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('gamerule') }}">競賽規程</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('gameschedule') }}">活動賽程</a>
+            </li>
             {% if current_user.is_authenticated %}
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('get_teams', game_id='2023 第十屆全國 EMBA 籃球邀請賽' ) }}">已報名資料</a>

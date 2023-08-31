@@ -163,6 +163,10 @@ def logout():
 def gamerule():
     return render_template('rule.html')
 
+@app.route('/gameschedule')
+def gameschedule():
+    return render_template('schedule.html')
+
 # query all teams 
 @app.route('/get_teams/<game_id>', methods=['GET', 'POST'])
 @login_required

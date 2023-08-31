@@ -1,3 +1,4 @@
 .env
 static/captcha_img.png
 ignore/
+__pycache__/

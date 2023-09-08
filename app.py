@@ -228,8 +228,8 @@ def editteam_member(team_id):
         sql_team = f'''SELECT A.team_id,B.id,team_name 報名單位,group_id 參賽組別,ctname 聯絡人,phone 電話,mobile "LINE ID",email 電子郵件,
                 coach 教練,head_coach 領隊,team_captain 隊長,
                 CASE WHEN sign_data IS NOT NULL THEN 'Y' ELSE '' END as 系辦蓋章,
-                CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "學校Logo",
-                CASE WHEN veri_data IS NOT NULL THEN 'Y' ELSE '' END as "授課證明",
+                CASE WHEN logo_data IS NOT NULL THEN 'Y' ELSE '' END as "隊徽Logo",
+                CASE WHEN veri_data IS NOT NULL THEN 'Y' ELSE '' END as 授課證明,
                 CASE WHEN qualified IS true THEN '是' ELSE '否' END as 是否合格, status 狀態
                 FROM team A INNER JOIN "user" B ON B.id=A.contact_pid WHERE A.team_id={team_id} '''
         team_data = engine.execute(sql_team).fetchone()

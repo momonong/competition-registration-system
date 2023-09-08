@@ -32,10 +32,10 @@
                             <a href="{{ url_for('showfile', ftype='SIGNDOC', reg_pid=outteam['team_id']) }}" data-toggle="tooltip"
                                 title="查看報名系辦蓋章檔案" class="text-decoration-none" target="_blank">📎</a>
                             </td>
-                        {% elif head == '學校Logo' and outteam['學校Logo'] =='Y' %}
+                        {% elif head == '隊徽Logo' and outteam['隊徽Logo'] =='Y' %}
                         <td align="left">
                             <a href="{{ url_for('showfile', ftype='LOGO', reg_pid=outteam['team_id']) }}" data-toggle="tooltip"
-                                title="查看學校Logo檔案" class="text-decoration-none" target="_blank">📎</a>
+                                title="查看球隊隊徽Logo檔案" class="text-decoration-none" target="_blank">📎</a>
                             </td>
                         {% elif head == '授課證明' and outteam['授課證明'] =='Y' %}
                         <td align="left">
@@ -141,9 +141,9 @@
                                 </div>
                             </div>
                             <div class="form-group ">
-                                <label for="in_file">球隊隊徽Logo檔案<font color="grey"><sub>（只限.ai/PDF/JPEG/PNG格式）</sub>
+                                <label for="in_file">球隊隊徽Logo檔案<font color="grey"><sub>（只限.ai格式）</sub>
                                     </font></label>
-                                {% if outteam['學校Logo'] =='Y' %}
+                                {% if outteam['隊徽Logo'] =='Y' %}
                                 <div class="form-control">
                                     <a href="{{ url_for('showfile', ftype='LOGO', reg_pid=outteam['team_id']) }}"
                                         target="_blank">檢視已上傳檔案</a>
@@ -154,9 +154,9 @@
                                 {% endif %}
                                 <div class="form-control">
                                     <input type="file"
-                                        accept=".ai, image/jpeg, application/pdf, image/png"
+                                        accept=".ai"
                                         name="in_file_logo" id="in_file_logo"
-                                        value="outteam['學校Logo']" placeholder="學校Logo檔案" />
+                                        value="outteam['隊徽Logo']" placeholder="球隊隊徽Logo檔案" />
                                     <button type="button" class="btn btn-link"
                                         onclick="document.getElementById('in_file_logo').value = ''">不要選擇檔案</button>
                                 </div>

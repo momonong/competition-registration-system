@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS public."user"
     phone character varying COLLATE pg_catalog."default",
     mobile character varying COLLATE pg_catalog."default",
     account character varying COLLATE pg_catalog."default",
+    ctname character varying COLLATE pg_catalog."default",
     CONSTRAINT user_pkey PRIMARY KEY (id),
     CONSTRAINT "UNI_email" UNIQUE (email)
 )
